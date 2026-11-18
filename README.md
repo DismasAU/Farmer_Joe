@@ -142,3 +142,11 @@ python tools/make_textures.py   # Media/*.tga
 - Drop data: CMaNGOS classic-db and Wowhead (via QuestieDB).
 - Live pricing: [Auctionator](https://www.curseforge.com/wow/addons/auctionator)'s public API.
 - Design: the "Coffee" palette and window design from the `WoW Forever Addon UI Mockups` handoff in this repository.
+
+---
+
+## License
+
+Farmer Joe is free software, licensed under the [GNU General Public License v3.0](LICENSE). You can use, study, change and share it. If you distribute a modified version, it must also be released under GPL-3.0 with its source code available.
+
+The bundled drop data is derived from CMaNGOS classic-db (GPL-3.0) and from Wowhead drop rates collected by QuestieDB.
