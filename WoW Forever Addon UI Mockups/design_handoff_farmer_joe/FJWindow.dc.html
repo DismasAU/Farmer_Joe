@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&amp;family=Marcellus&amp;display=swap" rel="stylesheet"></helmet>
+<div style="position:relative; width:760px; height:470px; box-sizing:border-box; display:flex; flex-direction:column; background:{{ t.frameBg }}; border:1px solid #000; box-shadow:{{ t.frameShadow }}; font-family:'Arial Narrow','Archivo Narrow',sans-serif; font-size:12px; color:{{ t.text }}; text-shadow:1px 1px 0 #000; user-select:none;">
+  <sc-if value="{{ showPortrait }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:-12px; top:-14px; width:58px; height:58px; border-radius:50%; z-index:3; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 40%, #2a1d0c, #0b0703); box-shadow:{{ t.portraitRing }};">
+      <div style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 36% 30%, #fff4b8 0%, #f2c23c 32%, #b47d12 70%, #5c3a05 100%); box-shadow:inset 0 0 0 2px rgba(92,58,5,.75), inset 0 0 0 3px rgba(255,236,150,.5), inset 0 0 0 4px rgba(92,58,5,.45);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4a2c02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 0 rgba(255,244,190,.8));"><path d="M7 3.5V8.5C7 10.2 8.3 11.5 10 11.5H14C15.7 11.5 17 10.2 17 8.5V3.5"></path><path d="M12 3.5V21"></path></svg></div>
+    </div>
+    <div style="position:absolute; right:3px; bottom:3px; width:6px; height:6px; background:#c99b3b; box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; left:3px; bottom:3px; width:6px; height:6px; background:#c99b3b; box-shadow:0 0 0 1px #000;"></div>
+  </sc-if>
+  <sc-if value="{{ showEmblem }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:-16px; top:-18px; width:66px; height:66px; border-radius:50%; z-index:3; background:#000 url(assets/fj-emblem-320.png) center / 106% no-repeat; box-shadow:0 0 0 1px #000, 0 2px 0 1px rgba(0,0,0,.6);"></div>
+  </sc-if>
+  <div style="margin:4px 4px 0; height:24px; flex:none; display:flex; align-items:center; justify-content:{{ t.titleJustify }}; padding-left:{{ t.titlePad }}; padding-right:30px; background:{{ t.titleBg }}; border-bottom:1px solid {{ t.titleLine }};">
+    <span style="font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:13px; color:{{ t.titleColor }}; text-shadow:{{ t.titleShadow }}; letter-spacing:.02em;">Farmer Joe - Gold Farms</span>
+  </div>
+  <div style="position:absolute; top:7px; right:8px; width:18px; height:18px; display:flex; align-items:center; justify-content:center; background:linear-gradient(#b0281a,#650d05); border:1px solid #000; box-shadow:inset 0 1px 0 #e0583a, inset 0 0 0 1px #2a0603; color:#ffe2d6; font:700 11px/1 Arial,sans-serif; cursor:pointer;">✕</div>
+
+  <sc-if value="{{ navTabs }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:8px 14px 0; flex:none; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:2px; align-items:end; border-bottom:1px solid {{ t.tabLine }};">
+      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="12">
+        <div onClick="{{ tab.onClick }}" style="position:relative; height:{{ tab.h }}; display:flex; align-items:center; justify-content:center; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:10px; color:{{ tab.color }}; text-shadow:{{ tab.shadow }}; background:{{ tab.bg }}; border:1px solid {{ tab.border }}; border-bottom:none; cursor:pointer;">{{ tab.label }}<sc-if value="{{ tab.mine }}"><span style="position:absolute; top:2px; right:2px; width:4px; height:4px; background:#1eff00; box-shadow:0 0 0 1px #000;"></span></sc-if></div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="height:30px; flex:none; margin:6px 14px 6px {{ t.headerPad }}; display:flex; align-items:center; gap:6px; position:relative; z-index:4;">
+    <sc-if value="{{ navArrows }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ prev }}" style="width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:{{ t.arrowBg }}; border:1px solid #000; box-shadow:{{ t.arrowShadow }}; color:{{ t.arrowColor }}; text-shadow:{{ t.btnText }}; font-family:'Friz Quadrata TT',Marcellus,serif; font-size:13px; cursor:pointer;">&lt;</div>
+      <span style="min-width:156px; text-align:center; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:13px; color:{{ t.gold }};">{{ bracketLabel }}<span style="color:#1eff00;">{{ youText }}</span></span>
+      <div onClick="{{ next }}" style="width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:{{ t.arrowBg }}; border:1px solid #000; box-shadow:{{ t.arrowShadow }}; color:{{ t.arrowColor }}; text-shadow:{{ t.btnText }}; font-family:'Friz Quadrata TT',Marcellus,serif; font-size:13px; cursor:pointer;">&gt;</div>
+    </sc-if>
+    <sc-if value="{{ navTabs }}" hint-placeholder-val="{{ false }}">
+      <span style="font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:14px; color:{{ t.gold }}; margin-right:4px;">{{ bracketLabel }}<span style="color:#1eff00;">{{ youText }}</span></span>
+    </sc-if>
+    <sc-if value="{{ navDrop }}" hint-placeholder-val="{{ false }}">
+      <div style="position:relative;">
+        <div onClick="{{ toggleDrop }}" style="display:flex; align-items:center; height:22px; width:196px; background:#000; border:1px solid #5e5e5e; box-shadow:inset 0 0 0 1px #000; cursor:pointer;">
+          <span style="flex:1; padding:0 8px; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:12px; color:#fff; white-space:nowrap;">{{ bracketLabel }}<span style="color:#1eff00;">{{ youText }}</span></span>
+          <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; background:linear-gradient(#3c3c3c,#161616); box-shadow:inset 0 0 0 1px #6a6a6a; color:{{ t.gold }}; font-size:9px;">▼</div>
+        </div>
+        <sc-if value="{{ dropOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:25px; left:0; width:196px; padding:6px 0; background:rgba(6,8,18,.96); border:1px solid #9a9aa6; box-shadow:inset 0 0 0 1px #000;">
+            <sc-for list="{{ dropItems }}" as="it" hint-placeholder-count="12">
+              <div onClick="{{ it.onClick }}" style="display:flex; align-items:center; gap:6px; height:17px; padding:0 10px; color:{{ it.color }}; background:{{ it.bg }}; cursor:pointer;" style-hover="background:rgba(80,120,255,.25)"><span style="width:10px; color:{{ t.gold }};">{{ it.mark }}</span>{{ it.label }}<span style="color:#1eff00;">{{ it.you }}</span></div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <div onClick="{{ myLevel }}" style="height:22px; padding:0 10px; display:flex; align-items:center; background:{{ t.btnBg }}; border:1px solid #000; box-shadow:{{ t.btnShadow }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:11px; color:{{ t.btnColor }}; text-shadow:{{ t.btnText }}; cursor:pointer;">My level</div>
+    <div style="flex:1;"></div>
+    <div onClick="{{ toggleOnly }}" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+      <div style="width:15px; height:15px; display:flex; align-items:center; justify-content:center; background:#000; border:1px solid #8a7a4a; box-shadow:inset 0 0 0 1px #000; color:{{ t.gold }}; font:700 13px/1 Arial,sans-serif;">{{ onlyMark }}</div>
+      <span style="white-space:nowrap;">Only farms I can do</span>
+    </div>
+    <div onClick="{{ toggleHide }}" style="display:flex; align-items:center; gap:5px; margin-left:8px; cursor:pointer;">
+      <div style="width:15px; height:15px; display:flex; align-items:center; justify-content:center; background:#000; border:1px solid #8a7a4a; box-shadow:inset 0 0 0 1px #000; color:{{ t.gold }}; font:700 13px/1 Arial,sans-serif;">{{ hideMark }}</div>
+      <span style="white-space:nowrap;">Hide thin/crashing</span>
+    </div>
+  </div>
+
+  <div style="flex:1; min-height:0; display:flex; gap:10px; padding:0 14px;">
+    <div style="width:420px; flex:none; display:flex; flex-direction:column; background:{{ t.listBg }}; border:1px solid {{ t.listBorder }};">
+      <div style="height:20px; flex:none; display:flex; align-items:center; gap:6px; padding:0 6px; background:{{ t.colHeadBg }}; border-bottom:1px solid {{ t.listBorder }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:10px; color:{{ t.gold }};">
+        <span style="width:16px; text-align:right;">#</span>
+        <span style="flex:1;">Farm</span>
+        <span style="width:{{ t.goldW }};">Gold/hr</span>
+        <span style="width:{{ t.diffW }};">Diff</span>
+        <span style="width:58px;">Flags</span>
+      </div>
+      <div style="flex:1; min-height:0; position:relative; overflow:hidden;">
+        <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
+          <div onClick="{{ row.onClick }}" onMouseEnter="{{ row.onEnter }}" onMouseLeave="{{ row.onLeave }}" style="height:21px; display:flex; align-items:center; gap:6px; padding:0 6px; background:{{ row.bg }}; box-shadow:{{ row.shadow }}; color:{{ row.color }}; cursor:pointer;">
+            <span style="width:16px; text-align:right; color:{{ row.rankColor }};">{{ row.rank }}</span>
+            <span style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">{{ row.name }}</span>
+            <div style="width:{{ t.goldW }}; display:flex; align-items:center; gap:6px;">
+              <span style="width:{{ t.goldTextW }}; flex:none; white-space:nowrap; color:{{ row.goldColor }};">{{ row.gold }}</span>
+              <sc-if value="{{ row.showBar }}">
+                <div style="position:relative; flex:1; height:7px; background:#000; box-shadow:inset 0 0 0 1px #4d3819;">
+                  <div style="position:absolute; top:1px; bottom:1px; left:{{ row.barL }}; width:{{ row.barW }}; background:{{ t.barFill }}; opacity:{{ row.barO }};"></div>
+                </div>
+              </sc-if>
+            </div>
+            <div style="width:{{ t.diffW }}; display:flex; align-items:center; gap:2px;">
+              <sc-if value="{{ row.showPips }}">
+                <sc-for list="{{ row.pips }}" as="pip" hint-placeholder-count="5"><span style="width:7px; height:7px; background:{{ pip.bg }}; box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), 0 0 0 1px #2a2a2a;"></span></sc-for>
+                <span style="margin-left:3px; color:{{ t.sub }};">{{ row.pipQ }}</span>
+              </sc-if>
+              <sc-if value="{{ row.showDiffText }}"><span style="color:{{ row.diffColor }};">{{ row.diffText }}</span></sc-if>
+            </div>
+            <div style="width:58px; display:flex; gap:3px;">
+              <sc-for list="{{ row.flags }}" as="f" hint-placeholder-count="0">
+                <sc-if value="{{ f.badge }}"><span style="height:14px; padding:0 4px; display:flex; align-items:center; font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:{{ f.color }}; background:{{ f.bg }}; box-shadow:inset 0 0 0 1px {{ f.color }};">{{ f.label }}</span></sc-if>
+                <sc-if value="{{ f.plain }}"><span style="color:{{ f.color }};">{{ f.label }}</span></sc-if>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:0 48px; text-align:center;">
+            <div style="font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:14px; color:{{ t.gold }};">{{ empty.title }}</div>
+            <div style="font-size:13px; line-height:1.4; color:{{ t.text }}; text-wrap:pretty;">{{ empty.body }}</div>
+            <sc-if value="{{ empty.hasBtn }}">
+              <div onClick="{{ clearFilters }}" style="margin-top:4px; height:22px; padding:0 12px; display:flex; align-items:center; background:{{ t.btnBg }}; border:1px solid #000; box-shadow:{{ t.btnShadow }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:11px; color:{{ t.btnColor }}; text-shadow:{{ t.btnText }}; cursor:pointer;">Show all farms</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div ref="{{ detailRef }}" style="flex:1; min-width:0; position:relative; overflow-y:auto; overflow-x:hidden; box-sizing:border-box; padding:10px 12px 12px; background:{{ d.bg }}; border:1px solid {{ d.border }}; box-shadow:inset 0 0 0 1px rgba(0,0,0,.55); text-shadow:{{ d.shadow }}; color:{{ d.body }}; line-height:1.35; scrollbar-width:thin; scrollbar-color:{{ d.scroll }};">
+      <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ true }}">
+        <div style="font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:15px; line-height:1.2; color:{{ d.name }};">{{ sel.name }}</div>
+        <div style="margin-top:2px; color:{{ d.sub }};">{{ sel.zoneLine }}</div>
+        <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:2px 6px; font-size:13px;">
+          <span><span style="color:{{ d.sub }};">Gold/hr </span>{{ sel.gold }}</span>
+          <span style="color:{{ d.sub }};">·</span>
+          <span><span style="color:{{ d.sub }};">Difficulty </span><span style="color:{{ sel.diffColor }};">{{ sel.diffText }}</span></span>
+          <span style="color:{{ d.sub }};">·</span>
+          <span style="color:{{ sel.scoreColor }};">{{ sel.scoreText }}</span>
+        </div>
+        <div style="margin-top:1px; font-size:11px; color:{{ d.sub }};">{{ sel.src }}</div>
+        <sc-if value="{{ sel.hasCant }}"><div style="margin-top:7px; color:{{ d.bad }};">{{ sel.cant }}</div></sc-if>
+        <sc-if value="{{ sel.hasReqs }}">
+          <div style="margin-top:8px; display:flex; flex-direction:column; gap:1px;">
+            <sc-for list="{{ sel.reqs }}" as="rq" hint-placeholder-count="1"><div><span style="color:{{ d.sub }};">{{ rq.label }} </span><span style="color:{{ rq.color }};">{{ rq.value }}</span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <div style="margin-top:12px; padding-bottom:2px; border-bottom:1px solid {{ d.rule }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:12px; color:{{ d.head }};">How to</div>
+        <div style="margin-top:5px; display:flex; flex-direction:column; gap:5px;">
+          <sc-for list="{{ sel.how }}" as="step" hint-placeholder-count="3"><div style="text-wrap:pretty;">{{ step }}</div></sc-for>
+        </div>
+
+        <sc-if value="{{ sel.hasNotes }}">
+          <div style="margin-top:12px; padding-bottom:2px; border-bottom:1px solid {{ d.rule }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:12px; color:{{ d.head }};">Notes</div>
+          <div style="margin-top:5px; text-wrap:pretty;">{{ sel.notes }}</div>
+        </sc-if>
+
+        <div style="margin-top:12px; padding-bottom:2px; border-bottom:1px solid {{ d.rule }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:12px; color:{{ d.head }};">Market</div>
+        <sc-if value="{{ sel.hasMarket }}">
+          <div style="margin-top:5px; display:flex; align-items:center; gap:6px;">
+            <span style="font-size:13px; color:{{ d.name }};">{{ sel.m.item }}</span>
+            <sc-for list="{{ sel.m.flags }}" as="mf" hint-placeholder-count="0"><span style="height:14px; padding:0 4px; display:flex; align-items:center; font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:{{ mf.color }}; box-shadow:inset 0 0 0 1px {{ mf.color }};">{{ mf.label }}</span></sc-for>
+          </div>
+          <div style="margin-top:4px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px;">
+            <div><div style="font-size:11px; color:{{ d.sub }};">Listed</div><div>{{ sel.m.listed }}</div></div>
+            <div><div style="font-size:11px; color:{{ d.sub }};">Sold per day</div><div>{{ sel.m.perDay }}</div></div>
+            <div><div style="font-size:11px; color:{{ d.sub }};">7-day change</div><div style="color:{{ sel.m.changeColor }};">{{ sel.m.change }}</div></div>
+          </div>
+          <sc-if value="{{ sel.m.hasScan }}"><div style="margin-top:6px; color:{{ d.good }};">Your Auctionator scan: {{ sel.m.scan }}</div></sc-if>
+          <div style="margin-top:4px; font-size:11px; color:{{ d.sub }};">Community AH snapshot, US Normal Alliance. Your own scan is used when it's newer.</div>
+        </sc-if>
+        <sc-if value="{{ sel.noMarket }}"><div style="margin-top:5px; color:{{ d.sub }};">No market data for this farm yet.</div></sc-if>
+
+        <sc-if value="{{ sel.hasContainer }}">
+          <div ref="{{ containerRef }}" style="margin-top:12px; padding-bottom:2px; border-bottom:1px solid {{ d.rule }}; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:12px; color:{{ d.head }};">Container</div>
+          <div style="margin-top:5px; font-size:13px; color:{{ d.name }};">{{ sel.c.name }}</div>
+          <div style="color:{{ d.sub }};">Expected value <span style="color:{{ d.body }};">{{ sel.c.ev }}</span> · <span style="color:{{ d.body }};">{{ sel.c.perHour }}</span> per hour</div>
+          <div style="margin-top:6px; display:grid; grid-template-columns:minmax(0,1fr) 44px 30px; column-gap:6px; row-gap:1px;">
+            <span style="font-size:11px; color:{{ d.sub }};">Loot</span><span style="font-size:11px; color:{{ d.sub }}; text-align:right;">Chance</span><span style="font-size:11px; color:{{ d.sub }}; text-align:right;">Qty</span>
+            <sc-for list="{{ sel.c.loot }}" as="li" hint-placeholder-count="4">
+              <span style="color:{{ li.color }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ li.item }}</span><span style="text-align:right;">{{ li.chance }}</span><span style="text-align:right;">{{ li.qty }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:8px; font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:11px; color:{{ d.head }};">Pools</div>
+          <div style="margin-top:2px; display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:8px; row-gap:1px;">
+            <sc-for list="{{ sel.c.pools }}" as="pl" hint-placeholder-count="3"><span>{{ pl.name }}</span><span style="text-align:right; color:{{ d.sub }};">{{ pl.value }}</span></sc-for>
+          </div>
+          <div style="margin-top:6px; font-size:11px; color:{{ d.sub }};">{{ sel.c.caveat }}</div>
+        </sc-if>
+
+        <div style="margin-top:12px; font-size:11px; color:{{ d.sub }}; word-break:break-all;">{{ sel.url }}</div>
+      </sc-if>
+      <sc-if value="{{ noSel }}" hint-placeholder-val="{{ false }}">
+        <div style="height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 20px; color:{{ d.sub }};">Pick a farm on the left to see how to run it.</div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="height:24px; flex:none; margin:4px 14px 6px; display:flex; align-items:center; gap:5px; font-size:12px; color:{{ t.sub }}; border-top:1px solid {{ t.listBorder }};">
+    <span style="color:{{ t.text }};">{{ footCount }}</span>
+    <span>· Prices: US Normal Alliance, 17 Nov 2026 10:17 AEST</span>
+    <div style="flex:1;"></div>
+    <sc-if value="{{ seedWarn }}" hint-placeholder-val="{{ false }}"><span style="color:{{ t.thin }};">Seed data: names only</span></sc-if>
+  </div>
+
+  <sc-if value="{{ goldFrame }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; inset:-3px; border:4px solid transparent; border-image:{{ t.frameImage }}; box-shadow:0 0 0 1px #000, inset 0 0 0 1px #000; pointer-events:none; z-index:2;"></div>
+    <div style="position:absolute; left:-2px; top:-2px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; right:-2px; top:-2px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; left:-2px; bottom:-2px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; right:-2px; bottom:-2px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; left:-2px; top:231px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; right:-2px; top:231px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+    <div style="position:absolute; left:376px; bottom:-2px; width:7px; height:7px; border-radius:50%; z-index:3; background:radial-gradient(circle at 35% 30%, #8a8478, #3a3630 60%, #151310); box-shadow:0 0 0 1px #000;"></div>
+  </sc-if>
+  <sc-if value="{{ tip.show }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:{{ tip.left }}; top:{{ tip.top }}; z-index:10; min-width:190px; max-width:250px; padding:7px 9px; background:rgba(6,8,18,.95); border:1px solid #9a9aa6; box-shadow:inset 0 0 0 1px #000; pointer-events:none; display:flex; flex-direction:column; gap:2px;">
+      <div style="font-family:'Friz Quadrata TT','Friz Quadrata',Marcellus,Georgia,serif; font-size:13px; color:#fff;">{{ tip.name }}</div>
+      <div style="color:#c8c8c8;">{{ tip.zone }}</div>
+      <sc-if value="{{ tip.hasReason }}"><div style="color:#ff2020;">{{ tip.reason }}</div></sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:470},&quot;look&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;classic&quot;,&quot;farmhouse&quot;,&quot;custard&quot;,&quot;harvest&quot;,&quot;ledger&quot;,&quot;goblin&quot;,&quot;gilded&quot;],&quot;default&quot;:&quot;farmhouse&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cantdo&quot;,&quot;fishing&quot;,&quot;missing&quot;,&quot;filtered&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const BRACKETS = ['1-5','6-10','11-15','16-20','21-25','26-30','31-35','36-40','41-45','46-50','51-55','56-60'];
+const MY = 4;
+const PLAYER = { level: 23, cls: 'Warrior', profs: ['Fishing', 'Mining'] };
+const DIFF = { 1: '#1eff00', 2: '#9acd32', 3: '#ffd100', 4: '#ff8000', 5: '#ff2020' };
+const FLAGS = { thin: { label: 'thin', color: '#ff8000', bg: 'rgba(255,128,0,.16)' }, crashing: { label: 'crashing', color: '#ff2020', bg: 'rgba(255,32,32,.16)' } };
+
+const FARMS = {
+  '21-25': [
+    { rank: 1, name: 'Green Recluses', zone: 'Duskwood', mobs: '21-22', lo: 18, hi: 30, gold: '18-30g', diff: 2, score: '12.0', bonus: ['Cooking'],
+      src: 'From 14 player reports, Oct-Nov 2026',
+      how: ['Clear the spider caves west of Raven Hill, then loop north along the Twilight Grove treeline.', 'Recluses respawn in about 5 minutes, so three caves keep a solo loop busy.', 'Vendor greys in Darkshire. Post legs and silk on the auction house.'],
+      notes: 'Bring poison cures. The elite Naraxis sits at the back of the north cave.',
+      market: { item: 'Gooey Spider Leg', listed: '214', perDay: '~180', change: '+4%', dir: 'up', flags: [], scan: '1.2g' },
+      url: 'wowforever-farms.example/duskwood/green-recluses' },
+    { rank: 2, name: 'Durnholde Keep Syndicate', zone: 'Hillsbrad Foothills', mobs: '24-28', lo: 0, hi: 40, upTo: true, gold: 'up to 40g', diff: 3, score: '10.8', flags: ['thin'],
+      src: 'From 6 player reports; top end needs a pattern drop',
+      how: ['Enter by the south gate and clear the outer courtyard first.', 'Syndicate Conjurers drop most of the pattern loot. Skip the watchmen if you are short on time.', 'Leave the keep to reset once the inner yard is clear.'],
+      notes: 'Gold/hr depends on one rare pattern. Without it, expect 8-12g.',
+      market: { item: 'Pattern: Red Woolen Bag', listed: '3', perDay: '~1', change: '+11%', dir: 'up', flags: ['thin'] },
+      url: 'wowforever-farms.example/hillsbrad/durnholde-syndicate' },
+    { rank: 3, name: 'Wetlands pool fishing', zone: 'Wetlands coast', lo: 12, hi: 20, gold: '12-20g', diff: 1, score: '10.4', flags: ['crashing'], req: ['Fishing'],
+      src: 'Pool catch + chest value at Fishing 150+',
+      how: ['Follow the coast north from Menethil Harbor to the Bluegill murlocs and back.', 'Fish every Oily Blackmouth and Firefin Snapper school. Floating Wreckage gives chests.', 'Expect about 14 pools per loop at normal population.'],
+      notes: 'Blackmouth prices are falling as more players fish here. Hold stock or sell Firefin first.',
+      market: { item: 'Oily Blackmouth', listed: '1,840', perDay: '~600', change: '-22%', dir: 'down', flags: ['crashing'], scan: '4s 80c' },
+      container: { name: 'Battered Chest', ev: '≈ 38s', perHour: '~5',
+        loot: [{ item: 'Wool Cloth', chance: '42%', qty: '1-3', q: 'common' }, { item: 'Silk Cloth', chance: '18%', qty: '1-2', q: 'common' }, { item: 'Moss Agate', chance: '9%', qty: '1', q: 'uncommon' }, { item: 'Random green, lvl 20-25', chance: '6%', qty: '1', q: 'uncommon' }, { item: 'Rusty Hook', chance: '25%', qty: '1', q: 'poor' }],
+        pools: [{ name: 'Oily Blackmouth School', value: '~6s per fish' }, { name: 'Firefin Snapper School', value: '~9s per fish' }, { name: 'Floating Wreckage', value: 'chest' }],
+        caveat: 'Drop chances use Classic Era data and may differ on WoW Forever.' },
+      url: 'wowforever-farms.example/wetlands/pool-fishing' },
+    { rank: 4, name: 'Ashenvale stalker skinning', zone: 'Ashenvale', mobs: '20-24', lo: 10, hi: 16, gold: '10-16g', diff: 2, score: '7.8', req: ['Skinning'],
+      src: 'From 9 player reports, Nov 2026',
+      how: ['Work the Ashenvale Stalkers and Ghostpaw wolves south of Astranaar.', 'Skin everything; sell Medium Leather in stacks of 10.'],
+      notes: 'Contested zone. Expect Horde traffic near Splintertree.',
+      market: { item: 'Medium Leather', listed: '1,120', perDay: '~520', change: '-2%', dir: 'down', flags: [] },
+      url: 'wowforever-farms.example/ashenvale/stalker-skinning' },
+    { rank: 5, name: 'Scarlet Monastery Graveyard solo', zone: 'Tirisfal Glades', mobs: '26-30', gold: '?', diff: null, score: null, seed: true,
+      src: 'No gold/hr reports yet',
+      how: ['No route written yet.'],
+      url: 'wowforever-farms.example/tirisfal/sm-graveyard' },
+    { rank: 6, name: 'Mosshide gnoll cloth', zone: 'Wetlands', mobs: '21-24', lo: 8, hi: 12, gold: '8-12g', diff: 1, score: '6.1',
+      src: 'From 4 player reports, Sep 2026',
+      how: ['Loop the gnoll camps between Dun Modr road and the Thelgen Rock entrance.', 'Keep all Wool Cloth; vendor the rest.'],
+      market: { item: 'Wool Cloth', listed: '960', perDay: '~410', change: '-3%', dir: 'down', flags: [] },
+      url: 'wowforever-farms.example/wetlands/mosshide-gnolls' },
+  ],
+  '26-30': [
+    { rank: 1, name: 'Scarlet Monastery Library solo', zone: 'Tirisfal Glades', mobs: '28-33', lo: 20, hi: 35, gold: '20-35g', diff: 4, score: '11.6', cls: 'Mage', src: 'From 8 player reports', how: ['AoE-pull the hallway packs before the Houndmaster.'], url: 'wowforever-farms.example/tirisfal/sm-library' },
+    { rank: 2, name: 'Stranglethorn tiger skinning', zone: 'Stranglethorn Vale', mobs: '30-33', lo: 14, hi: 24, gold: '14-24g', diff: 3, score: '9.9', req: ['Skinning'], src: 'From 5 player reports', how: ['Circle the Kurzen camp clearing and skin every tiger.'], url: 'wowforever-farms.example/stv/tigers' },
+    { rank: 3, name: 'Arathi Witherbark trolls', zone: 'Arathi Highlands', mobs: '28-31', lo: 0, hi: 30, upTo: true, gold: 'up to 30g', diff: 3, score: '8.7', flags: ['thin'], src: 'From 3 player reports', how: ['Clear Witherbark Village from the east side.'], url: 'wowforever-farms.example/arathi/witherbark' },
+    { rank: 4, name: 'Hillsbrad herb loop', zone: 'Hillsbrad Foothills', lo: 10, hi: 18, gold: '10-18g', diff: 1, score: '8.2', req: ['Herbalism'], src: 'From 7 player reports', how: ['Ride the river banks and the Alterac foothills edge.'], url: 'wowforever-farms.example/hillsbrad/herbs' },
+    { rank: 5, name: 'Alterac Syndicate cloth', zone: 'Alterac Mountains', mobs: '30-35', lo: 9, hi: 15, gold: '9-15g', diff: 2, score: '6.9', flags: ['crashing'], src: 'From 4 player reports', how: ['Farm the Syndicate camp below Strahnbrad.'], url: 'wowforever-farms.example/alterac/syndicate' },
+  ],
+};
+
+const GOLD = 'linear-gradient(#fff3c4 0%, #f6cd52 22%, #c48d16 52%, #8a5a08 64%, #e2ad34 82%, #fff0a8 100%)';
+const GOLD_DIAG = 'linear-gradient(#6b5426, #3d2f14 50%, #574320) 1';
+const BASE = { nav: 'arrows', portrait: false, goldFrame: false, frameImage: 'none', titleColor: '#ffd100', titleShadow: '1px 1px 0 #000', btnColor: '#ffd100', btnText: '1px 1px 0 #000', barFill: 'linear-gradient(#ffe68a,#c48a14)', arrowBg: 'linear-gradient(#3c3c3c,#161616)', arrowShadow: 'inset 0 0 0 1px #6a6a6a', arrowColor: '#ffd100', portraitRing: '0 0 0 3px #8f672b, 0 0 0 4px #2a1c0b, 0 0 0 5px #000', tabActiveBg: 'linear-gradient(#7a5626,#3a2810)', tabActiveColor: '#ffd100', tabActiveShadow: '1px 1px 0 #000', tabActiveBorder: '#c99b3b', tabBg: 'linear-gradient(#2a1d0c,#140e06)', tabColor: '#b8a070', tabBorder: '#4d3819', tabLine: '#8f672b', headerPad: '14px', gold: '#ffd100', text: '#ffffff', sub: '#9d9d9d', dim: '#808080', thin: '#ff8000' };
+const T_CLASSIC = { ...BASE, frameBg: 'linear-gradient(#151515,#070707)', frameShadow: 'inset 0 0 0 2px #5e5e5e, inset 0 0 0 3px #1e1e1e, inset 0 0 0 4px #000', titleBg: 'linear-gradient(#5c4613,#2a1f07)', titleLine: '#a8862a', titleJustify: 'center', titlePad: '30px', listBg: 'rgba(0,0,0,.5)', listBorder: '#3a3a3a', colHeadBg: 'linear-gradient(#2a2a2a,#151515)', zebra: 'rgba(255,255,255,.03)', btnBg: 'linear-gradient(#a01e10,#5c0c05)', btnShadow: 'inset 0 1px 0 #d8553a, inset 0 0 0 1px #300703', goldW: '64px', goldTextW: '64px', diffW: '34px', bar: false, pips: false, badges: false, detail: 'dark' };
+const THEMES = {
+  classic: T_CLASSIC,
+  harvest: { ...BASE, nav: 'tabs', portrait: true, frameBg: 'repeating-linear-gradient(90deg,rgba(255,235,200,.018) 0 2px,rgba(0,0,0,0) 2px 9px), linear-gradient(#21180d,#130d07)', frameShadow: 'inset 0 0 0 2px #8f672b, inset 0 0 0 3px #3a2810, inset 0 0 0 5px #160f07, inset 0 0 0 6px #5c4220', titleBg: 'linear-gradient(#6c4b1f,#3b2911)', titleLine: '#c99b3b', titleJustify: 'flex-start', titlePad: '58px', listBg: 'rgba(0,0,0,.42)', listBorder: '#4d3819', colHeadBg: 'linear-gradient(#3c2b13,#23190b)', zebra: 'rgba(255,220,160,.035)', btnBg: 'linear-gradient(#74511f,#3e2b10)', btnShadow: 'inset 0 1px 0 #b08a48, inset 0 0 0 1px #1a1207', goldW: '112px', goldTextW: '54px', diffW: '48px', bar: true, pips: true, badges: true, detail: 'oak' },
+  ledger: { ...T_CLASSIC, nav: 'dropdown', diffW: '48px', pips: true, badges: true, detail: 'parch' },
+  farmhouse: { ...T_CLASSIC, emblem: true, titlePad: '64px', headerPad: '58px', gold: '#F7CE5B', text: '#DFD6A7', sub: '#AF9B46', dim: '#7d7457', thin: '#F7B05B',
+    frameBg: 'linear-gradient(#2b1c03,#1F1300)', frameShadow: 'inset 0 0 0 2px #AF9B46, inset 0 0 0 3px #1F1300, inset 0 0 0 4px #000',
+    titleBg: 'linear-gradient(#3d2a08,#1F1300)', titleLine: '#AF9B46', titleColor: '#F7CE5B',
+    listBg: 'rgba(0,0,0,.32)', listBorder: '#5e4f22', colHeadBg: 'linear-gradient(#36260a,#1F1300)', zebra: 'rgba(223,214,167,.035)',
+    btnBg: 'linear-gradient(#F7B05B,#c27a2c)', btnShadow: 'inset 0 1px 0 #fbd29a, inset 0 0 0 1px #5a3006', btnColor: '#1F1300', btnText: '0 1px 0 rgba(255,225,170,.55)',
+    arrowBg: 'linear-gradient(#F7B05B,#c27a2c)', arrowShadow: 'inset 0 1px 0 #fbd29a, inset 0 0 0 1px #5a3006', arrowColor: '#1F1300',
+    barFill: 'linear-gradient(#F7CE5B,#AF9B46)', detail: 'coffee' },
+  custard: { ...T_CLASSIC, emblem: true, titlePad: '64px', headerPad: '58px', gold: '#F7CE5B', text: '#DFD6A7', sub: '#AF9B46', dim: '#7d7457', thin: '#F7B05B',
+    frameBg: 'linear-gradient(#2b1c03,#1F1300)', frameShadow: 'inset 0 0 0 2px #AF9B46, inset 0 0 0 3px #1F1300, inset 0 0 0 4px #000',
+    titleBg: 'linear-gradient(#3d2a08,#1F1300)', titleLine: '#AF9B46', titleColor: '#F7CE5B',
+    listBg: 'rgba(0,0,0,.32)', listBorder: '#5e4f22', colHeadBg: 'linear-gradient(#36260a,#1F1300)', zebra: 'rgba(223,214,167,.035)',
+    btnBg: 'linear-gradient(#F7B05B,#c27a2c)', btnShadow: 'inset 0 1px 0 #fbd29a, inset 0 0 0 1px #5a3006', btnColor: '#1F1300', btnText: '0 1px 0 rgba(255,225,170,.55)',
+    arrowBg: 'linear-gradient(#F7B05B,#c27a2c)', arrowShadow: 'inset 0 1px 0 #fbd29a, inset 0 0 0 1px #5a3006', arrowColor: '#1F1300',
+    detail: 'custard' },
+  goblin: { ...BASE, nav: 'tabs', portrait: true, goldFrame: true, frameImage: GOLD_DIAG,
+    frameBg: 'repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, rgba(0,0,0,0) 1px 3px), linear-gradient(#2a2620,#131210)', frameShadow: 'inset 0 0 0 3px #000, inset 0 0 0 4px #4a3a12',
+    titleBg: GOLD, titleLine: '#2a1a02', titleColor: '#2a1600', titleShadow: '0 1px 0 rgba(255,246,200,.75)', titleJustify: 'flex-start', titlePad: '62px',
+    listBg: 'rgba(0,0,0,.55)', listBorder: '#6a5014', colHeadBg: 'linear-gradient(#3a352c,#1c1a16)', zebra: 'rgba(255,214,90,.035)',
+    btnBg: GOLD, btnShadow: 'inset 0 0 0 1px #5a3a06, inset 0 1px 0 #fffbe0', btnColor: '#2a1600', btnText: '0 1px 0 rgba(255,246,200,.6)',
+    arrowBg: GOLD, arrowShadow: 'inset 0 0 0 1px #5a3a06', arrowColor: '#2a1600',
+    barFill: 'linear-gradient(#fffbe0,#ffd23a 40%,#a8700e)', portraitRing: '0 0 0 3px #f2c24a, 0 0 0 4px #7a4e06, 0 0 0 5px #000',
+    tabActiveBg: GOLD, tabActiveColor: '#2a1600', tabActiveShadow: '0 1px 0 rgba(255,246,200,.7)', tabActiveBorder: '#fff0a8', tabBg: 'linear-gradient(#3a352c,#1c1a16)', tabColor: '#e8c860', tabBorder: '#6a5014', tabLine: '#d39a1e',
+    goldW: '112px', goldTextW: '54px', diffW: '48px', bar: true, pips: true, badges: true, detail: 'iron' },
+  gilded: { ...BASE, goldFrame: true, frameImage: GOLD_DIAG,
+    frameBg: 'linear-gradient(#0d0c0a,#050505)', frameShadow: 'inset 0 0 0 3px #000, inset 0 0 0 4px #4a3a12',
+    titleBg: GOLD, titleLine: '#2a1a02', titleColor: '#2a1600', titleShadow: '0 1px 0 rgba(255,246,200,.75)', titleJustify: 'center', titlePad: '30px',
+    listBg: 'rgba(0,0,0,.6)', listBorder: '#7a5a14', colHeadBg: 'linear-gradient(#2c2820,#141210)', zebra: 'rgba(255,214,90,.03)',
+    btnBg: GOLD, btnShadow: 'inset 0 0 0 1px #5a3a06, inset 0 1px 0 #fffbe0', btnColor: '#2a1600', btnText: '0 1px 0 rgba(255,246,200,.6)',
+    arrowBg: GOLD, arrowShadow: 'inset 0 0 0 1px #5a3a06', arrowColor: '#2a1600',
+    goldW: '64px', goldTextW: '64px', diffW: '48px', bar: false, pips: true, badges: true, detail: 'baize' },
+};
+const D_DARK = { bg: '#040404', border: '#3a3a3a', name: '#ffffff', body: '#ffffff', sub: '#9d9d9d', head: '#ffd100', good: '#1eff00', bad: '#ff2020', warn: '#ff8000', rule: 'rgba(255,209,0,.22)', shadow: '1px 1px 0 #000', scroll: '#5e5e5e #040404', diff: DIFF };
+const DETAILS = {
+  dark: D_DARK,
+  oak: { ...D_DARK, bg: 'linear-gradient(#0f0b06,#070504)', border: '#4d3819', rule: 'rgba(201,155,59,.35)', scroll: '#6c4b1f #0f0b06' },
+  parch: { bg: 'linear-gradient(#f0e2bf,#dcc795)', border: '#6b5226', name: '#1c1003', body: '#2e1e0a', sub: '#66502f', head: '#5c2f00', good: '#1d6a00', bad: '#a3140b', warn: '#9a4800', rule: 'rgba(92,47,0,.35)', shadow: 'none', scroll: '#8a6a3a #dcc795', diff: { 1: '#1d6a00', 2: '#4a6600', 3: '#7a5c00', 4: '#9a4800', 5: '#a3140b' } },
+  coffee: { ...D_DARK, bg: 'linear-gradient(#170e00,#100900)', border: '#5e4f22', name: '#F7CE5B', body: '#DFD6A7', sub: '#AF9B46', head: '#F7CE5B', warn: '#F7B05B', rule: 'rgba(175,155,70,.4)', scroll: '#AF9B46 #100900' },
+  custard: { bg: 'linear-gradient(#e7dfb5,#DFD6A7)', border: '#AF9B46', name: '#1F1300', body: '#2c1d04', sub: '#6a5a1e', head: '#8a4f0a', good: '#1d6a00', bad: '#a3140b', warn: '#9a5208', rule: 'rgba(31,19,0,.25)', shadow: 'none', scroll: '#AF9B46 #DFD6A7', diff: { 1: '#1d6a00', 2: '#4a6600', 3: '#7a5c00', 4: '#9a4800', 5: '#a3140b' } },
+  iron: { ...D_DARK, bg: 'linear-gradient(#100f0c,#080706)', border: '#8a6a1c', rule: 'rgba(255,209,0,.38)', scroll: '#c8921c #100f0c' },
+  baize: { ...D_DARK, bg: 'radial-gradient(120% 80% at 50% 0%, #1f4d2e, #10301c 65%, #0a1f12)', border: '#8a6a1c', body: '#f4eedb', sub: '#a7b898', good: '#6dff4a', bad: '#ff5a46', warn: '#ffa64a', rule: 'rgba(255,209,0,.42)', scroll: '#c8921c #10301c' },
+};
+
+const norm = f => ({ flags: [], req: [], bonus: [], cls: null, ...f });
+const missing = f => [...f.req.filter(p => !PLAYER.profs.includes(p)).map(p => 'needs ' + p), ...(f.cls && f.cls !== PLAYER.cls ? [f.cls + ' only'] : [])];
+
+const INIT = {
+  normal: { b: MY, only: false, hide: false, sel: 1, hover: null },
+  cantdo: { b: MY, only: false, hide: false, sel: 4, hover: 3 },
+  fishing: { b: MY, only: false, hide: false, sel: 3, hover: null },
+  missing: { b: MY, only: false, hide: false, sel: 5, hover: null },
+  filtered: { b: MY, only: false, hide: true, sel: 1, hover: null },
+  empty: { b: 5, only: true, hide: true, sel: null, hover: null },
+};
+
+class Component extends DCLogic {
+  detailRef = React.createRef();
+  containerRef = React.createRef();
+  state = { ...(INIT[this.props.state] || INIT.normal), dropOpen: false };
+
+  componentDidMount() { this.scrollDetail(); }
+  componentDidUpdate(prev) {
+    if (prev.state !== this.props.state || prev.look !== this.props.look) {
+      this.setState({ ...(INIT[this.props.state] || INIT.normal), dropOpen: false }, () => this.scrollDetail());
+    }
+  }
+  scrollDetail() {
+    let tries = 0;
+    const run = () => {
+      const el = this.detailRef.current, c = this.containerRef.current;
+      if (this.props.state !== 'fishing') { if (el) el.scrollTop = 0; return; }
+      if (!el || !c || el.scrollHeight <= el.clientHeight) { if (tries++ < 60) setTimeout(run, 50); return; }
+      el.scrollTop = c.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 150;
+      if (tries++ < 8) setTimeout(run, 150);
+    };
+    run();
+  }
+  setBracket(b) {
+    b = Math.max(0, Math.min(11, b));
+    this.setState({ b, sel: null, hover: null, dropOpen: false }, () => { if (this.detailRef.current) this.detailRef.current.scrollTop = 0; });
+  }
+
+  renderVals() {
+    const look = THEMES[this.props.look] ? this.props.look : 'harvest';
+    const t = THEMES[look];
+    const d = DETAILS[t.detail];
+    const { b, only, hide, hover } = this.state;
+    const label = BRACKETS[b];
+    const all = (FARMS[label] || []).map(norm);
+    const can = f => missing(f).length === 0;
+    const byCan = f => only && !can(f);
+    const byFlag = f => !byCan(f) && hide && f.flags.length > 0;
+    const visible = all.filter(f => !byCan(f) && !byFlag(f));
+    const hiddenCan = all.filter(byCan).length, hiddenFlag = all.filter(byFlag).length;
+    const hidden = hiddenCan + hiddenFlag;
+    const selF = visible.find(f => f.rank === this.state.sel) || visible[0] || null;
+
+    const rows = visible.map((f, i) => {
+      const ok = can(f), isSel = selF && f.rank === selF.rank;
+      let barL = '0%', barW = '0%', barO = 1;
+      if (f.upTo) { barW = '100%'; barO = 0.35; }
+      else if (f.lo != null) { barL = (f.lo / 40 * 100) + '%'; barW = Math.max((f.hi - f.lo) / 40 * 100, 4) + '%'; }
+      return {
+        rank: f.rank, name: f.name, gold: f.gold,
+        bg: isSel ? 'linear-gradient(90deg,rgba(30,255,0,.30),rgba(30,255,0,.07))' : hover === i ? 'rgba(255,255,255,.08)' : (i % 2 ? t.zebra : 'transparent'),
+        shadow: isSel ? 'inset 0 1px 0 rgba(30,255,0,.45), inset 0 -1px 0 rgba(30,255,0,.45)' : 'none',
+        color: ok ? t.text : t.dim, rankColor: ok ? t.sub : '#5a5a5a',
+        goldColor: !ok ? t.dim : f.lo == null && !f.upTo ? t.sub : t.text,
+        showBar: t.bar, barL, barW, barO: ok ? barO : barO * 0.45,
+        showPips: t.pips, showDiffText: !t.pips,
+        pips: [1, 2, 3, 4, 5].map(n => ({ bg: f.diff && n <= f.diff ? (ok ? DIFF[f.diff] : '#5a5a5a') : '#141414' })),
+        pipQ: f.diff ? '' : '?',
+        diffText: f.diff ? f.diff + '/5' : '?', diffColor: !ok ? t.dim : f.diff ? DIFF[f.diff] : t.sub,
+        flags: f.flags.map(k => ({ ...FLAGS[k], ...(k === 'thin' ? { color: t.thin, bg: 'rgba(247,176,91,.16)' } : {}), badge: t.badges, plain: !t.badges })),
+        onClick: () => this.setState({ sel: f.rank }, () => { if (this.detailRef.current) this.detailRef.current.scrollTop = 0; }),
+        onEnter: () => this.setState({ hover: i }),
+        onLeave: () => this.setState({ hover: null }),
+      };
+    });
+
+    const hv = hover != null ? visible[hover] : null;
+    const rowsTop = t.nav === 'tabs' ? 124 : 94;
+    const tip = hv ? { show: true, name: hv.name, zone: hv.zone + (hv.mobs ? ' · mobs ' + hv.mobs : ''), hasReason: !can(hv), reason: missing(hv).map(r => r[0].toUpperCase() + r.slice(1)).join(', '), left: '210px', top: (rowsTop + hover * 21 + 18) + 'px' } : { show: false };
+
+    let sel = null;
+    if (selF) {
+      const f = selF, miss = missing(f);
+      const reqs = [
+        ...f.req.map(p => ({ label: 'Requires:', value: p, color: PLAYER.profs.includes(p) ? d.body : d.bad })),
+        ...f.bonus.map(p => ({ label: 'Bonus with:', value: p, color: d.body })),
+        ...(f.cls ? [{ label: 'Class:', value: f.cls, color: f.cls === PLAYER.cls ? d.body : d.bad }] : []),
+      ];
+      const fc = k => ({ label: FLAGS[k].label, color: k === 'thin' ? d.warn : d.bad });
+      const qc = { common: d.body, uncommon: d.good, poor: d.sub };
+      sel = {
+        name: f.name, zoneLine: f.mobs ? f.zone + ' · mobs ' + f.mobs : f.zone,
+        gold: f.gold, diffText: f.diff ? f.diff + '/5' : '?', diffColor: f.diff ? d.diff[f.diff] : d.sub,
+        scoreText: f.score ? 'Score ' + f.score : 'Score: none', scoreColor: f.score ? d.body : d.sub,
+        src: f.src, hasCant: miss.length > 0, cant: "You can't run this yet: " + miss.join(', '),
+        hasReqs: reqs.length > 0, reqs, how: f.how || [],
+        hasNotes: !!f.notes, notes: f.notes,
+        hasMarket: !!f.market, noMarket: !f.market,
+        m: f.market ? { ...f.market, flags: f.market.flags.map(fc), changeColor: f.market.dir === 'up' ? d.good : f.market.flags.includes('crashing') ? d.bad : d.body, hasScan: !!f.market.scan } : {},
+        hasContainer: !!f.container,
+        c: f.container ? { ...f.container, loot: f.container.loot.map(l => ({ ...l, color: qc[l.q] })) } : {},
+        url: f.url,
+      };
+    }
+
+    let empty = {};
+    if (visible.length === 0) {
+      if (all.length === 0) empty = { title: 'No farms listed yet', body: 'Nobody has reported a farm for Levels ' + label + ' yet. Try a nearby bracket.', hasBtn: false };
+      else {
+        const parts = [];
+        if (hiddenCan) parts.push(hiddenCan + (hiddenCan === 1 ? ' needs' : ' need') + " a class or profession you don't have");
+        if (hiddenFlag) parts.push(hiddenFlag + (hiddenFlag === 1 ? ' is' : ' are') + ' thin or crashing');
+        empty = { title: 'No farms match your filters', body: 'All ' + all.length + ' farms for Levels ' + label + ' are hidden: ' + parts.join(', ') + '.', hasBtn: true };
+      }
+    }
+
+    const tabs = BRACKETS.map((lb, i) => {
+      const a = i === b;
+      return { label: lb, mine: i === MY, h: a ? '22px' : '19px', color: a ? t.tabActiveColor : t.tabColor, shadow: a ? t.tabActiveShadow : '1px 1px 0 #000', bg: a ? t.tabActiveBg : t.tabBg, border: a ? t.tabActiveBorder : t.tabBorder, onClick: () => this.setBracket(i) };
+    });
+
+    return {
+      t, d, navArrows: t.nav === 'arrows', navTabs: t.nav === 'tabs', navDrop: t.nav === 'dropdown', showPortrait: t.portrait, showEmblem: !!t.emblem, goldFrame: t.goldFrame,
+      tabs, bracketLabel: 'Levels ' + label, youText: b === MY ? ' (you: ' + PLAYER.level + ')' : '',
+      prev: () => this.setBracket(b - 1), next: () => this.setBracket(b + 1), myLevel: () => this.setBracket(MY),
+      dropOpen: this.state.dropOpen, toggleDrop: () => this.setState(s => ({ dropOpen: !s.dropOpen })),
+      dropItems: BRACKETS.map((lb, i) => ({ label: 'Levels ' + lb, you: i === MY ? ' (you)' : '', mark: i === b ? '✓' : '', color: i === b ? '#ffd100' : '#ffffff', bg: 'transparent', onClick: () => this.setBracket(i) })),
+      onlyMark: only ? '✓' : '', hideMark: hide ? '✓' : '',
+      toggleOnly: () => this.setState(s => ({ only: !s.only, hover: null })),
+      toggleHide: () => this.setState(s => ({ hide: !s.hide, hover: null })),
+      clearFilters: () => this.setState({ only: false, hide: false }),
+      rows, isEmpty: visible.length === 0, empty,
+      hasSel: !!sel, noSel: !sel, sel: sel || {}, detailRef: this.detailRef, containerRef: this.containerRef,
+      footCount: visible.length + ' shown' + (hidden ? ', ' + hidden + ' hidden by filters' : ''),
+      seedWarn: all.some(f => f.seed),
+      tip,
+    };
+  }
+}
+</script>
+</body>
+</html>

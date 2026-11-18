@@ -1,0 +1,16 @@
+tier,area,pool,object_id,loot_table_url,container,container_chance_per_catch,avg_fish,avg_containers,avg_rum,avg_kelp,fish_value_g,container_value_g,other_value_g,pool_value_g
+T1,Westfall / Loch Modan / Darkshore pools,Oily Blackmouth School,180582,https://database.ravencraft.io/object/180582,Tightly Sealed Trunk,5%,3.4,0.3,0.2,0.5,0.012,0.012,0.008,0.032
+T1,Westfall / Loch Modan / Darkshore pools,Sagefish School,180656,https://database.ravencraft.io/object/180656,Tightly Sealed Trunk,5%,5.2,0.4,0.1,0.7,0.024,0.016,0.01,0.051
+T1,Westfall / Loch Modan / Darkshore pools,Floating Debris,180655,https://database.ravencraft.io/object/180655,Tightly Sealed Trunk,60%,0,1.6,0.7,1.8,0,0.064,0.029,0.093
+T2,Wetlands / Hillsbrad / Ashenvale pools,Firefin Snapper School,180657,https://database.ravencraft.io/object/180657,Watertight Trunk,5%,3.3,0.4,0.2,0.3,0.011,0.041,0.005,0.057
+T2,Wetlands / Hillsbrad / Ashenvale pools,Oily Blackmouth School,180664,https://database.ravencraft.io/object/180664,Watertight Trunk,5%,3.4,0.3,0.2,0.5,0.012,0.03,0.008,0.05
+T2,Wetlands / Hillsbrad / Ashenvale pools,Sagefish School,180663,https://database.ravencraft.io/object/180663,Watertight Trunk,5%,5.2,0.4,0.1,0.7,0.024,0.041,0.01,0.075
+T2,Wetlands / Hillsbrad / Ashenvale pools,Floating Wreckage,180662,https://database.ravencraft.io/object/180662,Watertight Trunk,60%,0,1.6,0.7,1.8,0,0.162,0.029,0.191
+T3,STV / Dustwallow / Desolace pools,Oily Blackmouth School,180682,https://database.ravencraft.io/object/180682,Iron Bound Trunk,5%,3.4,0.3,0.2,0.5,0.012,0.08,0.01,0.102
+T3,STV / Dustwallow / Desolace pools,Firefin Snapper School,180683,https://database.ravencraft.io/object/180683,Iron Bound Trunk,5%,3.3,0.4,0.2,0.3,0.011,0.106,0.007,0.125
+T3,STV / Dustwallow / Desolace pools,Greater Sagefish School,180684,https://database.ravencraft.io/object/180684,Iron Bound Trunk,5%,5.2,0.4,0.1,0.7,0.072,0.106,0.011,0.19
+T3,STV / Dustwallow / Desolace pools,Floating Wreckage,180685,https://database.ravencraft.io/object/180685,Iron Bound Trunk,60%,0,1.6,0.7,1.8,0,0.426,0.036,0.462
+T4,Tanaris / Feralas / Azshara / south STV pools,Oily Blackmouth School,180750,https://database.ravencraft.io/object/180750,Mithril Bound Trunk,5%,3.4,0.3,0.2,0.5,0.012,0.178,0.01,0.2
+T4,Tanaris / Feralas / Azshara / south STV pools,Firefin Snapper School,180752,https://database.ravencraft.io/object/180752,Mithril Bound Trunk,5%,3.3,0.4,0.2,0.3,0.011,0.238,0.007,0.256
+T4,Tanaris / Feralas / Azshara / south STV pools,Stonescale Eel Swarm,180712,https://database.ravencraft.io/object/180712,Mithril Bound Trunk,5%,3.2,0.2,0.1,0.3,0.072,0.119,0.006,0.196
+T4,Tanaris / Feralas / Azshara / south STV pools,Floating Wreckage,180751,https://database.ravencraft.io/object/180751,Mithril Bound Trunk,60%,0,1.6,0.7,1.8,0,0.952,0.036,0.987

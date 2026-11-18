@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: Farmer Joe
+## Notes: Gold farm guide by level bracket, priced live from your Auctionator scans.
+## Version: 0.7.0
+## SavedVariables: FarmerJoeDB
+## OptionalDeps: Auctionator
+
+Data.lua
+Loot.lua
+DropIndex.lua
+Core.lua
+Prices.lua
+Dynamic.lua
+MapPins.lua
+Session.lua
+UI.lua
+SessionUI.lua
+Minimap.lua
