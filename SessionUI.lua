@@ -5,6 +5,7 @@ local C, FS, Solid, Gradient, Edge, Media = K.C, K.FS, K.Solid, K.Gradient, K.Ed
 local FRIZ, NARROW, DOT = K.FRIZ, K.NARROW, K.DOT
 
 local SW, SH = 320, 456
+local MINI_W, MINI_H = 270, 24           -- collapsed: a thin bar in the style of the quest tracker header
 local EDGE, PAD, TITLE_H = 5, 13, 24
 local ROW_H = 22
 local LIST_Y = 222                       -- top of the loot list (below its column header)
@@ -16,6 +17,7 @@ local PILL_W = 52
 
 local win
 local offset = 0
+local BuildMini, ApplyExpanded
 
 local ACTION = {
   auction = { "Auction", C.clay, true },
@@ -37,9 +39,13 @@ local function Clock(secs)
   return string.format("%d:%02d", m, s)
 end
 
+-- Anchored by the top-left, so collapsing and expanding keep the top edge in place.
 local function SavePosition()
-  local point, _, relPoint, x, y = win:GetPoint(1)
-  FarmerJoeDB.sessionWindow = { point = point, relativePoint = relPoint, x = x, y = y }
+  local l, t = win:GetLeft(), win:GetTop()
+  if not (l and t) then return end
+  win:ClearAllPoints()
+  win:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l, t)
+  FarmerJoeDB.sessionWindow = { point = "TOPLEFT", relativePoint = "BOTTOMLEFT", x = l, y = t }
 end
 
 ---------------------------------------------------------------- update
@@ -76,6 +82,25 @@ local function Update()
   local s = ns.Session()
   local st = ns.SessionState(s)
   local t = ns.SessionTotals(s)
+
+  -- collapsed bar
+  local m = win.mini
+  local ac = st == "running" and C.live or (st == "paused" and C.clay or C.bronze)
+  m.line:SetColorTexture(ac[1], ac[2], ac[3], 0.9)
+  Gradient(m.glow, "VERTICAL", ac, ac, 0.12, 0)
+  m.plus.text:SetTextColor(ac[1], ac[2], ac[3])
+  if s then
+    m.gph:SetText((t.gph and Gold(t.gph, 13) or "-") .. " /hr")
+    if st == "paused" then m.time:SetText(K.Col("clay", "Paused ") .. Clock(t.elapsed))
+    elseif st == "finished" then m.time:SetText("Done " .. Clock(t.elapsed))
+    else m.time:SetText(Clock(t.elapsed)) end
+    m.total:SetText(Gold(t.total, 12))
+  else
+    m.gph:SetText("Farming")
+    m.time:SetText("no session")
+    m.total:SetText("")
+  end
+  m.totals = t
 
   -- hero
   win.farm:SetText(s and (s.farm or "Free farming") or "No session running")
@@ -136,29 +161,37 @@ end
 ns.UpdateSessionWindow = Update
 
 ---------------------------------------------------------------- build
+-- secondary text: grey in the flat look, Golden Bronze in the classic one
+local function Sub() return ns.Flat() and K.GREY or C.bronze end
+
 local function Chrome()
-  for i = 1, 6 do Edge(win, -i, 1, C.black, 0.32 * (1 - i / 7) ^ 1.5, "BACKGROUND", -8) end
-  local bg = win:CreateTexture(nil, "BACKGROUND", nil, -7)
+  if ns.Flat() then win.chrome = K.FlatChrome(win); return end
+  local ch = CreateFrame("Frame", nil, win)
+  ch:SetAllPoints()
+  ch:SetFrameLevel(win:GetFrameLevel())
+  win.chrome = ch
+  for i = 1, 6 do Edge(ch, -i, 1, C.black, 0.32 * (1 - i / 7) ^ 1.5, "BACKGROUND", -8) end
+  local bg = ch:CreateTexture(nil, "BACKGROUND", nil, -7)
   bg:SetAllPoints()
   Gradient(bg, "VERTICAL", C.frameTop, C.coffee)
-  local grain = win:CreateTexture(nil, "BACKGROUND", nil, -6)
+  local grain = ch:CreateTexture(nil, "BACKGROUND", nil, -6)
   grain:SetPoint("TOPLEFT", EDGE, -EDGE); grain:SetPoint("BOTTOMRIGHT", -EDGE, EDGE)
   grain:SetTexture(Media("Grain128"), "REPEAT", "REPEAT")
   grain:SetTexCoord(0, (SW - EDGE * 2) / 128, 0, (SH - EDGE * 2) / 128)
   if grain.SetHorizTile then grain:SetHorizTile(true); grain:SetVertTile(true) end
   grain:SetAlpha(0.7)
-  local vig = win:CreateTexture(nil, "BACKGROUND", nil, -5)
+  local vig = ch:CreateTexture(nil, "BACKGROUND", nil, -5)
   vig:SetPoint("TOPLEFT", EDGE, -EDGE); vig:SetPoint("BOTTOMRIGHT", -EDGE, EDGE)
   vig:SetTexture(Media("Vignette256"))
 
-  Edge(win, 0, 1, C.black, 1, "BORDER", 0)
-  Edge(win, 1, 2, C.bronze, 1, "BORDER", 0)
-  local glint = Solid(win, "BORDER", 1, C.clayHi, 0.45)
+  Edge(ch, 0, 1, C.black, 1, "BORDER", 0)
+  Edge(ch, 1, 2, C.bronze, 1, "BORDER", 0)
+  local glint = Solid(ch, "BORDER", 1, C.clayHi, 0.45)
   glint:SetPoint("TOPLEFT", 1, -1); glint:SetPoint("TOPRIGHT", -1, -1); glint:SetHeight(1)
-  Edge(win, 3, 1, C.coffee, 1, "BORDER", 0)
-  Edge(win, 4, 1, C.black, 1, "BORDER", 0)
+  Edge(ch, 3, 1, C.coffee, 1, "BORDER", 0)
+  Edge(ch, 4, 1, C.black, 1, "BORDER", 0)
   for _, c in ipairs({ { "BOTTOMLEFT", 0, 1, 1, 0 }, { "BOTTOMRIGHT", 1, 0, 1, 0 } }) do
-    local t = win:CreateTexture(nil, "OVERLAY")
+    local t = ch:CreateTexture(nil, "OVERLAY")
     t:SetTexture(Media("Corner64"))
     t:SetSize(28, 28)
     t:SetPoint(c[1], 0, 0)
@@ -168,7 +201,23 @@ local function Chrome()
 end
 
 local function TitleBar()
-  local bar = CreateFrame("Frame", nil, win)
+  if ns.Flat() then
+    local bar = K.FlatTitle(win.full, "Farming Session", nil, function() FarmerJoeDB.sessionShown = false; win:Hide() end, 13)
+    bar:EnableMouse(true)
+    bar:RegisterForDrag("LeftButton")
+    bar:SetScript("OnDragStart", function() win:StartMoving() end)
+    bar:SetScript("OnDragStop", function() win:StopMovingOrSizing(); SavePosition() end)
+    local collapse = K.TextButton(bar, "-", 15, K.GREY, 20, 22)
+    collapse:SetPoint("RIGHT", bar.close, "LEFT", 0, 1)
+    collapse:SetScript("OnClick", function() ns.SetSessionExpanded(false) end)
+    collapse:HookScript("OnEnter", function(self)
+      GameTooltip:SetOwner(self, "ANCHOR_TOP")
+      GameTooltip:AddLine("Collapse to a single bar", 1, 1, 1)
+      GameTooltip:Show()
+    end)
+    return
+  end
+  local bar = CreateFrame("Frame", nil, win.full)
   bar:SetPoint("TOPLEFT", EDGE, -EDGE); bar:SetPoint("TOPRIGHT", -EDGE, -EDGE)
   bar:SetHeight(TITLE_H + 1)
   local bg = bar:CreateTexture(nil, "BACKGROUND")
@@ -206,18 +255,29 @@ local function TitleBar()
   bar:SetScript("OnDragStart", function() win:StartMoving() end)
   bar:SetScript("OnDragStop", function() win:StopMovingOrSizing(); SavePosition() end)
 
-  local close = CreateFrame("Button", nil, win, "UIPanelCloseButton")
+  local close = CreateFrame("Button", nil, win.full, "UIPanelCloseButton")
   close:SetSize(24, 24)
   close:SetPoint("CENTER", win, "TOPRIGHT", -17, -17)
   close:SetFrameLevel(bar:GetFrameLevel() + 5)
   close:SetScript("OnClick", function() FarmerJoeDB.sessionShown = false; win:Hide() end)
+
+  local collapse = ns.SessionToggleButton(win.full, false)
+  collapse:SetPoint("RIGHT", close, "LEFT", 0, 0)
+  collapse:SetFrameLevel(bar:GetFrameLevel() + 5)
 end
 
 -- Dark inset box at (x, y) from the window's top-left.
 local function Inset(x, y, w, h)
-  local f = CreateFrame("Frame", nil, win)
+  local f = CreateFrame("Frame", nil, win.full)
   f:SetPoint("TOPLEFT", x, -y)
   f:SetSize(w, h)
+  if ns.Flat() then
+    local bg = Solid(f, "BACKGROUND", 0, C.white, 0.05)
+    bg:SetAllPoints()
+    local top = Solid(f, "BORDER", 0, C.white, 0.09)
+    top:SetPoint("TOPLEFT"); top:SetPoint("TOPRIGHT"); top:SetHeight(1)
+    return f
+  end
   local bg = f:CreateTexture(nil, "BACKGROUND")
   bg:SetPoint("TOPLEFT", 1, -1); bg:SetPoint("BOTTOMRIGHT", -1, 1)
   Gradient(bg, "VERTICAL", C.black, C.coffee, 0.62, 0.42)
@@ -229,7 +289,7 @@ end
 
 -- A labelled stat in a box: small caps label above a value.
 local function Stat(parent, x, w, label, size, color)
-  local l = FS(parent, NARROW, 10, C.bronze)
+  local l = FS(parent, NARROW, 10, Sub())
   l:SetPoint("TOPLEFT", x, -7); l:SetWidth(w); l:SetJustifyH("CENTER")
   l:SetText(label:upper())
   local v = FS(parent, FRIZ, size, color)
@@ -266,7 +326,7 @@ local function Row(i)
   row.value:SetJustifyH("RIGHT"); row.value:SetJustifyV("MIDDLE")
   row.value:SetPoint("RIGHT", row.pill, "LEFT", -8, 0)
   row.value:SetWidth(60)
-  row.count = FS(row, NARROW, 12, C.bronze)
+  row.count = FS(row, NARROW, 12, Sub())
   row.count:SetJustifyH("RIGHT"); row.count:SetJustifyV("MIDDLE")
   row.count:SetPoint("RIGHT", row.value, "LEFT", -6, 0)
   row.count:SetWidth(30)
@@ -304,9 +364,117 @@ local function Row(i)
   return row
 end
 
+-- Plus/minus button that expands or collapses the window.
+function ns.SessionToggleButton(parent, expand)
+  local b = CreateFrame("Button", nil, parent)
+  b:SetSize(18, 18)
+  local base = "Interface\\Buttons\\UI-" .. (expand and "Plus" or "Minus") .. "Button-"
+  b:SetNormalTexture(base .. "Up")
+  b:SetPushedTexture(base .. "Down")
+  b:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight", "ADD")
+  b:SetScript("OnClick", function() ns.SetSessionExpanded(expand) end)
+  b:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:AddLine(expand and "Show loot and details" or "Collapse to a single bar", 1, 1, 1)
+    GameTooltip:Show()
+  end)
+  b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  return b
+end
+
+-- Small text button ("+", "x") for the collapsed bar.
+local function TextButton(parent, label, size, color, onClick, tip)
+  local b = CreateFrame("Button", nil, parent)
+  b:SetSize(16, MINI_H)
+  b.text = FS(b, FRIZ, size, color)
+  b.text:SetJustifyH("CENTER"); b.text:SetJustifyV("MIDDLE")
+  b.text:SetPoint("CENTER", 0, 0)
+  b.text:SetText(label)
+  b:SetScript("OnClick", onClick)
+  b:SetScript("OnEnter", function(self)
+    self.text:SetAlpha(1); self.text:SetShadowColor(1, 1, 1, 0.25)
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:AddLine(tip, 1, 1, 1)
+    GameTooltip:Show()
+  end)
+  b:SetScript("OnLeave", function(self)
+    self.text:SetShadowColor(0, 0, 0, 1)
+    GameTooltip:Hide()
+  end)
+  return b
+end
+
+-- Collapsed view, styled like the quest tracker header: translucent black strip, thin accent line
+-- on top (green running, clay paused), gold/hr as the title, time beside it, total and + on the right.
+BuildMini = function()
+  local m = CreateFrame("Frame", nil, win)
+  m:SetAllPoints()
+  win.mini = m
+  local bg = Solid(m, "BACKGROUND", 0, C.black, 0.62)
+  bg:SetAllPoints()
+  m.line = m:CreateTexture(nil, "BORDER")
+  m.line:SetPoint("TOPLEFT"); m.line:SetPoint("TOPRIGHT"); m.line:SetHeight(1)
+  m.glow = m:CreateTexture(nil, "BACKGROUND", nil, 1)
+  m.glow:SetPoint("TOPLEFT", 0, -1); m.glow:SetPoint("TOPRIGHT", 0, -1); m.glow:SetHeight(10)
+
+  m.gph = FS(m, FRIZ, 13, C.mustard)
+  m.gph:SetJustifyV("MIDDLE")
+  m.gph:SetPoint("LEFT", 9, 0)
+  m.time = FS(m, NARROW, 12, { 0.72, 0.72, 0.72 })
+  m.time:SetJustifyV("MIDDLE")
+  m.time:SetPoint("LEFT", m.gph, "RIGHT", 10, 0)
+
+  m.close = TextButton(m, "x", 11, { 0.55, 0.55, 0.55 }, function()
+    FarmerJoeDB.sessionShown = false; win:Hide()
+  end, "Hide (right-click the minimap button to bring it back)")
+  m.close:SetPoint("RIGHT", -3, 0)
+  m.plus = TextButton(m, "+", 13, C.live, function() ns.SetSessionExpanded(true) end, "Show loot and details")
+  m.plus:SetPoint("RIGHT", m.close, "LEFT", -1, 0)
+  m.total = FS(m, NARROW, 12, { 0.72, 0.72, 0.72 })
+  m.total:SetJustifyH("RIGHT"); m.total:SetJustifyV("MIDDLE")
+  m.total:SetPoint("RIGHT", m.plus, "LEFT", -6, 0)
+
+  -- drag to move; hover for the breakdown
+  m:EnableMouse(true)
+  m:RegisterForDrag("LeftButton")
+  m:SetScript("OnDragStart", function() win:StartMoving() end)
+  m:SetScript("OnDragStop", function() win:StopMovingOrSizing(); SavePosition() end)
+  m:SetScript("OnEnter", function(self)
+    local s, t = ns.Session(), self.totals
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    GameTooltip:AddLine(s and (s.farm or "Free farming") or "Farming session", C.mustard[1], C.mustard[2], C.mustard[3])
+    if s and t then
+      GameTooltip:AddDoubleLine("Total", FullMoney(t.total), 0.78, 0.78, 0.78, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Coin", FullMoney(t.coin), 0.78, 0.78, 0.78, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Vendor", FullMoney(t.vendor), 0.78, 0.78, 0.78, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Auction", FullMoney(t.auction), 0.78, 0.78, 0.78, 1, 1, 1)
+      GameTooltip:AddDoubleLine("Items looted", tostring(t.items), 0.78, 0.78, 0.78, 1, 1, 1)
+    end
+    GameTooltip:AddLine("Press + for the loot list. Drag to move.", 0.6, 0.6, 0.6)
+    GameTooltip:Show()
+  end)
+  m:SetScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
+ApplyExpanded = function()
+  local open = FarmerJoeDB.sessionExpanded and true or false
+  SavePosition() -- re-anchor by the top-left first so the top edge stays put
+  if open then win:SetSize(SW, SH) else win:SetSize(MINI_W, MINI_H) end
+  win.chrome:SetShown(open)
+  win.full:SetShown(open)
+  win.mini:SetShown(not open)
+end
+
+function ns.SetSessionExpanded(open)
+  FarmerJoeDB.sessionExpanded = open and true or false
+  if not win then return end
+  ApplyExpanded()
+  Update()
+end
+
 local function Build()
   win = CreateFrame("Frame", "FarmerJoeSessionFrame", UIParent)
-  win:SetSize(SW, SH)
+  if FarmerJoeDB.sessionExpanded then win:SetSize(SW, SH) else win:SetSize(MINI_W, MINI_H) end
   win:SetFrameStrata("MEDIUM")
   win:SetToplevel(true)
   win:SetMovable(true)
@@ -314,19 +482,22 @@ local function Build()
   win:SetClampedToScreen(true)
   if win.SetDontSavePosition then win:SetDontSavePosition(true) end
   local p = FarmerJoeDB.sessionWindow or {}
-  win:SetPoint(p.point or "RIGHT", UIParent, p.relativePoint or p.point or "RIGHT", p.x or -80, p.y or 40)
+  win:SetPoint(p.point or "TOPRIGHT", UIParent, p.relativePoint or p.point or "TOPRIGHT", p.x or -80, p.y or -200)
 
   Chrome()
+  local full = CreateFrame("Frame", nil, win)
+  full:SetAllPoints()
+  win.full = full
   TitleBar()
 
   -- hero: farm, zone, status
   local y = EDGE + TITLE_H + 10
-  win.status = K.MakePill(win, 16, 10)
+  win.status = K.MakePill(full, 16, 10)
   win.status:SetPoint("TOPRIGHT", -PAD - 26, -y)
-  win.farm = FS(win, FRIZ, 13, C.mustard)
+  win.farm = FS(full, FRIZ, 13, C.mustard)
   win.farm:SetPoint("TOPLEFT", PAD, -y)
   win.farm:SetPoint("RIGHT", win.status, "LEFT", -8, 0)
-  win.zone = FS(win, NARROW, 11, C.bronze)
+  win.zone = FS(full, NARROW, 11, Sub())
   win.zone:SetPoint("TOPLEFT", PAD, -(y + 18))
   win.zone:SetWidth(SW - PAD * 2)
 
@@ -341,7 +512,7 @@ local function Build()
     local d = Solid(panel, "BORDER", 2, C.paneLine, 0.8)
     d:SetPoint("TOPLEFT", third * i, -8); d:SetSize(1, 30)
   end
-  win.compare = FS(win, NARROW, 11, C.bronze)
+  win.compare = FS(full, NARROW, 11, Sub())
   win.compare:SetPoint("TOPLEFT", PAD, -(y + 52))
   win.compare:SetWidth(LIST_W)
 
@@ -368,25 +539,25 @@ local function Build()
 
   -- loot list
   y = y + 48
-  local head = CreateFrame("Frame", nil, win)
+  local head = CreateFrame("Frame", nil, full)
   head:SetPoint("TOPLEFT", PAD, -y); head:SetSize(LIST_W, 18)
   local hbg = head:CreateTexture(nil, "BACKGROUND")
   hbg:SetAllPoints()
-  Gradient(hbg, "VERTICAL", C.colTop, C.coffee)
-  local hl = Solid(head, "BORDER", 0, C.bronze, 0.6)
+  if ns.Flat() then hbg:SetColorTexture(1, 1, 1, 0.05) else Gradient(hbg, "VERTICAL", C.colTop, C.coffee) end
+  local hl = Solid(head, "BORDER", 0, ns.Flat() and C.white or C.bronze, ns.Flat() and 0.12 or 0.6)
   hl:SetPoint("BOTTOMLEFT"); hl:SetPoint("BOTTOMRIGHT"); hl:SetHeight(1)
-  win.lootHead = FS(head, NARROW, 10, C.bronze)
+  win.lootHead = FS(head, NARROW, 10, Sub())
   win.lootHead:SetJustifyV("MIDDLE"); win.lootHead:SetPoint("LEFT", 6, 0)
-  local sellHead = FS(head, NARROW, 10, C.bronze)
+  local sellHead = FS(head, NARROW, 10, Sub())
   sellHead:SetJustifyV("MIDDLE"); sellHead:SetJustifyH("CENTER")
   sellHead:SetPoint("RIGHT", -(12 + 2), 0); sellHead:SetWidth(PILL_W)
   sellHead:SetText("SELL AT")
-  local valHead = FS(head, NARROW, 10, C.bronze)
+  local valHead = FS(head, NARROW, 10, Sub())
   valHead:SetJustifyV("MIDDLE"); valHead:SetJustifyH("RIGHT")
   valHead:SetPoint("RIGHT", sellHead, "LEFT", -8, 0); valHead:SetWidth(60)
   valHead:SetText("WORTH")
 
-  local list = CreateFrame("Frame", nil, win)
+  local list = CreateFrame("Frame", nil, full)
   list:SetPoint("TOPLEFT", PAD, -(y + 18 + 2))
   list:SetSize(LIST_W, NUM_ROWS * ROW_H)
   win.list = list
@@ -399,31 +570,34 @@ local function Build()
   list:EnableMouseWheel(true)
   list:SetScript("OnMouseWheel", function(_, delta) win.bar:Scroll(delta * 2) end)
 
-  win.empty = FS(win, NARROW, 12, C.bronze)
+  win.empty = FS(full, NARROW, 12, Sub())
   win.empty:SetWordWrap(true)
   win.empty:SetJustifyH("CENTER")
   win.empty:SetWidth(LIST_W - 40)
   win.empty:SetPoint("TOP", list, "TOP", 0, -40)
 
   -- buttons
-  local foot = Solid(win, "BORDER", 0, C.bronze, 0.5)
+  local foot = Solid(full, "BORDER", 0, ns.Flat() and C.white or C.bronze, ns.Flat() and 0.1 or 0.5)
   foot:SetPoint("BOTTOMLEFT", PAD, 12 + 22 + 7); foot:SetPoint("BOTTOMRIGHT", -PAD, 12 + 22 + 7); foot:SetHeight(1)
-  win.primary = K.ClayButton(win, "Pause", 11, nil, 22)
+  win.primary = K.ClayButton(full, "Pause", 11, nil, 22)
   win.primary:SetPoint("BOTTOMLEFT", PAD, 12)
   win.primary:SetScript("OnClick", function(self)
     if self.action == "running" then ns.PauseSession()
     elseif self.action == "paused" then ns.ResumeSession()
     else ns.StartSession(nil) end
   end)
-  win.secondary = K.ClayButton(win, "Stop", 11, nil, 22)
+  win.secondary = K.ClayButton(full, "Stop", 11, nil, 22)
   win.secondary:SetPoint("LEFT", win.primary, "RIGHT", 6, 0)
   win.secondary:SetScript("OnClick", function()
     if ns.SessionState() == "finished" then ns.ClearSession() else ns.StopSession() end
   end)
-  local cut = FS(win, NARROW, 11, C.bronze)
+  local cut = FS(full, NARROW, 11, Sub())
   cut:SetJustifyV("MIDDLE")
   cut:SetPoint("BOTTOMRIGHT", -PAD - 4, 12 + 5)
   cut:SetText(string.format("AH cut %d%%", ns.AH_CUT * 100))
+
+  BuildMini()
+  ApplyExpanded()
 
   local elapsed = 0
   win:SetScript("OnUpdate", function(_, dt)

@@ -104,8 +104,101 @@ end
 
 local function Media(name) return ns.MEDIA .. name end
 
+---------------------------------------------------------------- flat look (quest tracker style)
+local GREY = { 0.72, 0.72, 0.72 }
+local DIM = { 0.45, 0.45, 0.45 }
+local FLAT_BG_A = 0.74 -- window background opacity in the flat look
+
+-- Translucent black panel with a thin accent line (and faint glow) along the top.
+local function FlatChrome(f, accent, alpha)
+  local ch = CreateFrame("Frame", nil, f)
+  ch:SetAllPoints()
+  ch:SetFrameLevel(f:GetFrameLevel())
+  local bg = Solid(ch, "BACKGROUND", -7, C.black, alpha or FLAT_BG_A)
+  bg:SetAllPoints()
+  accent = accent or C.mustard
+  ch.line = Solid(ch, "BORDER", 0, accent, 0.9)
+  ch.line:SetPoint("TOPLEFT"); ch.line:SetPoint("TOPRIGHT"); ch.line:SetHeight(1)
+  ch.glow = ch:CreateTexture(nil, "BACKGROUND", nil, -6)
+  ch.glow:SetPoint("TOPLEFT", 0, -1); ch.glow:SetPoint("TOPRIGHT", 0, -1); ch.glow:SetHeight(14)
+  Gradient(ch.glow, "VERTICAL", accent, accent, 0.10, 0)
+  return ch
+end
+
+-- Plain text button ("x", "+", "<"): dim until hovered.
+local function TextButton(parent, label, size, color, w, h)
+  local b = CreateFrame("Button", nil, parent)
+  b:SetSize(w or 18, h or 18)
+  b.text = FS(b, FRIZ, size, color)
+  b.text:SetJustifyH("CENTER"); b.text:SetJustifyV("MIDDLE")
+  b.text:SetPoint("CENTER", 0, 0)
+  b.text:SetText(label)
+  b.color = color
+  b:SetScript("OnEnter", function(self) self.text:SetTextColor(1, 1, 1) end)
+  b:SetScript("OnLeave", function(self) local c = self.color; self.text:SetTextColor(c[1], c[2], c[3]); GameTooltip:Hide() end)
+  b:SetScript("OnDisable", function(self) self:SetAlpha(0.3) end)
+  b:SetScript("OnEnable", function(self) self:SetAlpha(1) end)
+  return b
+end
+
+-- Flat title row: name on the left in the accent colour, subtitle after it, "x" on the right.
+local function FlatTitle(parent, title, sub, onClose, size, icon)
+  local bar = CreateFrame("Frame", nil, parent)
+  bar:SetPoint("TOPLEFT", 0, 0); bar:SetPoint("TOPRIGHT", 0, 0)
+  bar:SetHeight(26)
+  local t = FS(bar, FRIZ, size or 14, C.mustard)
+  t:SetJustifyV("MIDDLE")
+  if icon then
+    local e = bar:CreateTexture(nil, "ARTWORK")
+    e:SetTexture(icon)
+    e:SetSize(26, 26)
+    e:SetPoint("LEFT", 5, 0)
+    t:SetPoint("LEFT", e, "RIGHT", 4, 0)
+  else
+    t:SetPoint("LEFT", 10, 0)
+  end
+  t:SetText(title)
+  if sub then
+    local s = FS(bar, NARROW, 12, GREY)
+    s:SetJustifyV("MIDDLE")
+    s:SetPoint("LEFT", t, "RIGHT", 10, -1)
+    s:SetText(sub)
+    bar.sub = s
+  end
+  local rule = Solid(bar, "BORDER", 0, C.white, 0.08)
+  rule:SetPoint("BOTTOMLEFT", 8, 0); rule:SetPoint("BOTTOMRIGHT", -8, 0); rule:SetHeight(1)
+  local close = TextButton(bar, "x", 12, { 0.55, 0.55, 0.55 }, 22, 22)
+  close:SetPoint("RIGHT", -4, 0)
+  close:SetScript("OnClick", onClose)
+  bar.close, bar.title = close, t
+  return bar
+end
+
 -- Sunlit Clay button: gradient fill, 1px black border, #5A3006 inner edge, #FBD29A top highlight.
+local function FlatButton(parent, text, size, width, height)
+  local b = CreateFrame("Button", nil, parent)
+  local fill = Solid(b, "BACKGROUND", 0, C.white, 0.07)
+  fill:SetAllPoints()
+  local line = Solid(b, "BORDER", 0, C.mustard, 0.7)
+  line:SetPoint("TOPLEFT"); line:SetPoint("TOPRIGHT"); line:SetHeight(1)
+  local hl = b:CreateTexture(nil, "HIGHLIGHT")
+  hl:SetAllPoints()
+  hl:SetColorTexture(C.mustard[1], C.mustard[2], C.mustard[3], 0.14)
+  local label = FS(b, FRIZ, size, C.mustard)
+  label:SetJustifyV("MIDDLE")
+  label:SetPoint("CENTER", 0, 0)
+  label:SetText(text)
+  b.label = label
+  b:SetSize(width or math.ceil(label:GetStringWidth()) + 22, height or 22)
+  b:SetScript("OnMouseDown", function(self) if self:IsEnabled() then self.label:SetPoint("CENTER", 1, -1) end end)
+  b:SetScript("OnMouseUp", function(self) self.label:SetPoint("CENTER", 0, 0) end)
+  b:SetScript("OnDisable", function(self) self:SetAlpha(0.45) end)
+  b:SetScript("OnEnable", function(self) self:SetAlpha(1) end)
+  return b
+end
+
 local function ClayButton(parent, text, size, width, height)
+  if ns.Flat() then return FlatButton(parent, text, size, width, height) end
   local b = CreateFrame("Button", nil, parent)
   local fill = b:CreateTexture(nil, "BACKGROUND")
   fill:SetPoint("TOPLEFT", 1, -1); fill:SetPoint("BOTTOMRIGHT", -1, 1)
@@ -140,6 +233,12 @@ end
 
 -- Round gold page-arrow button (stock spellbook art).
 local function ArrowButton(parent, dir)
+  if ns.Flat() then
+    local b = TextButton(parent, dir == "Prev" and "<" or ">", 15, C.mustard, 22, 24)
+    local bg = Solid(b, "BACKGROUND", 0, C.white, 0.06)
+    bg:SetAllPoints()
+    return b
+  end
   local b = CreateFrame("Button", nil, parent)
   b:SetSize(26, 26)
   local base = "Interface\\Buttons\\UI-SpellbookIcon-" .. dir .. "Page-"
@@ -158,8 +257,13 @@ local function Checkbox(parent, text, key)
   box:SetPoint("LEFT", 0, 0)
   local bg = box:CreateTexture(nil, "BACKGROUND")
   bg:SetAllPoints()
-  Gradient(bg, "VERTICAL", C.black, C.coffee)
-  Edge(box, 0, 1, C.checkEdge, 1, "BORDER")
+  if ns.Flat() then
+    bg:SetColorTexture(0, 0, 0, 0.5)
+    Edge(box, 0, 1, C.white, 0.22, "BORDER")
+  else
+    Gradient(bg, "VERTICAL", C.black, C.coffee)
+    Edge(box, 0, 1, C.checkEdge, 1, "BORDER")
+  end
 
   b:SetCheckedTexture("Interface\\Buttons\\UI-CheckBox-Check")
   local ct = b:GetCheckedTexture()
@@ -169,7 +273,7 @@ local function Checkbox(parent, text, key)
   local ht = b:GetHighlightTexture()
   ht:ClearAllPoints(); ht:SetSize(21, 21); ht:SetPoint("CENTER", box, "CENTER", 0, 0)
 
-  local label = FS(b, NARROW, 12, C.custard)
+  local label = FS(b, NARROW, 12, ns.Flat() and GREY or C.custard)
   label:SetJustifyV("MIDDLE")
   label:SetPoint("LEFT", box, "RIGHT", 5, 0)
   label:SetText(text)
@@ -411,7 +515,13 @@ local function SlimBar(parent, onChange)
   thumb:SetWidth(6)
   local tt = thumb:CreateTexture(nil, "ARTWORK")
   tt:SetAllPoints()
-  Gradient(tt, "HORIZONTAL", C.bronze, C.bronzeDark)
+  if ns.Flat() then
+    tt:SetColorTexture(1, 1, 1, 0.28)
+    track:SetColorTexture(1, 1, 1, 0.05)
+    trackHi:Hide()
+  else
+    Gradient(tt, "HORIZONTAL", C.bronze, C.bronzeDark)
+  end
   local tl = Solid(thumb, "OVERLAY", 0, C.clayHi, 0.35)
   tl:SetPoint("TOPLEFT"); tl:SetPoint("TOPRIGHT"); tl:SetHeight(1)
   local th = thumb:CreateTexture(nil, "HIGHLIGHT")
@@ -473,6 +583,7 @@ ns.Kit = {
   Col = Col, FS = FS, Solid = Solid, Gradient = Gradient, Edge = Edge, Media = Media,
   ClayButton = ClayButton, MakePill = MakePill, SetPill = SetPill, SlimBar = SlimBar,
   CoinIcons = CoinIcons, Coins = Coins, Money = Money, ItemIcon = ItemIcon, ShowItemTip = ShowItemTip,
+  GREY = GREY, DIM = DIM, FlatChrome = FlatChrome, FlatTitle = FlatTitle, TextButton = TextButton,
 }
 
 ---------------------------------------------------------------- list
@@ -710,11 +821,15 @@ function Doc:Box(x, y, w, h, o)
     self:Rect(x, y, w, h, o.bg or C.black, o.bgA or 0.35, "BACKGROUND", 1)
   end
   local e, ea = o.edge or C.paneLine, o.edgeA or 1
-  self:Rect(x, y, w, 1, e, ea, "BORDER", 2)
-  self:Rect(x, y + h - 1, w, 1, e, ea, "BORDER", 2)
-  self:Rect(x, y + 1, 1, h - 2, e, ea, "BORDER", 2)
-  self:Rect(x + w - 1, y + 1, 1, h - 2, e, ea, "BORDER", 2)
-  if o.hi then self:Rect(x + 1, y + 1, w - 2, 1, o.hi, o.hiA or 0.2, "BORDER", 3) end
+  if ns.Flat() then
+    if not o.accent then self:Rect(x, y, w, 1, C.white, 0.09, "BORDER", 2) end
+  else
+    self:Rect(x, y, w, 1, e, ea, "BORDER", 2)
+    self:Rect(x, y + h - 1, w, 1, e, ea, "BORDER", 2)
+    self:Rect(x, y + 1, 1, h - 2, e, ea, "BORDER", 2)
+    self:Rect(x + w - 1, y + 1, 1, h - 2, e, ea, "BORDER", 2)
+  end
+  if o.hi and not ns.Flat() then self:Rect(x + 1, y + 1, w - 2, 1, o.hi, o.hiA or 0.2, "BORDER", 3) end
   if o.accent then self:Rect(x, y, 2, h, o.accent, 1, "BORDER", 4) end
 end
 
@@ -781,11 +896,16 @@ end
 -- Section heading: diamond, uppercase title, rule fading out to the right.
 function Doc:Heading(text)
   local y = self.y + 16
-  self:Diamond(0, y + 1, 9, C.mustard)
-  local fs, h = self:Text(text:upper(), { font = FRIZ, size = 11, color = C.mustard, x = 14, y = y, wrap = false, advance = false })
+  local flat = ns.Flat()
+  local tx = flat and 0 or 14
+  if not flat then self:Diamond(0, y + 1, 9, C.mustard) end
+  local fs, h = self:Text(flat and text or text:upper(), { font = FRIZ, size = flat and 12 or 11, color = C.mustard, x = tx, y = y, wrap = false, advance = false })
   local tw = math.ceil(fs:GetStringWidth())
-  local lx = 14 + tw + 8
-  if lx < DOC_W then self:Grad(lx, y + 5, DOC_W - lx, 1, "HORIZONTAL", C.bronze, C.bronze, 0.75, 0) end
+  local lx = tx + tw + 8
+  if lx < DOC_W then
+    if flat then self:Grad(lx, y + 6, DOC_W - lx, 1, "HORIZONTAL", C.white, C.white, 0.14, 0)
+    else self:Grad(lx, y + 5, DOC_W - lx, 1, "HORIZONTAL", C.bronze, C.bronze, 0.75, 0) end
+  end
   self.y = y + h + 8
 end
 
@@ -808,8 +928,12 @@ function Doc:Tiles(tiles, h, o)
   local y = self.y + (o.top or 8)
   for i, t in ipairs(tiles) do
     local x = (i - 1) * (tw + gap)
-    self:Box(x, y, tw, h, { bg = C.black, bgA = 0.45, fill2 = C.coffee, fill2A = 0.55, hi = C.bronze, hiA = 0.22 })
-    self:Text(t[1]:upper(), { size = 10, color = C.bronze, x = x + 8, w = tw - 12, y = y + 7, wrap = false, advance = false })
+    if ns.Flat() then
+      self:Box(x, y, tw, h, { bg = C.white, bgA = 0.05 })
+    else
+      self:Box(x, y, tw, h, { bg = C.black, bgA = 0.45, fill2 = C.coffee, fill2A = 0.55, hi = C.bronze, hiA = 0.22 })
+    end
+    self:Text(t[1]:upper(), { size = 10, color = ns.Flat() and GREY or C.bronze, x = x + 8, w = tw - 12, y = y + 7, wrap = false, advance = false })
     local vy = y + (o.valueY or 20)
     if type(t[2]) == "function" then
       t[2](x + 8, vy, tw - 12)
@@ -1336,6 +1460,7 @@ StaticPopupDialogs.FARMERJOE_NEW_SESSION = {
 }
 
 local function BuildChrome()
+  if ns.Flat() then FlatChrome(frame); return end
   -- soft drop shadow outside the frame
   for i = 1, 8 do Edge(frame, -i, 1, C.black, 0.32 * (1 - i / 9) ^ 1.5, "BACKGROUND", -8) end
 
@@ -1375,6 +1500,16 @@ local function BuildChrome()
 end
 
 local function BuildTitleBar()
+  if ns.Flat() then
+    local bar = FlatTitle(frame, "Farmer Joe", "Gold farms for your level", function() frame:Hide() end, 15, Media("Emblem128"))
+    bar:SetHeight(EDGE + TITLE_H)
+    bar:SetFrameLevel(frame:GetFrameLevel() + 5)
+    bar:EnableMouse(true)
+    bar:RegisterForDrag("LeftButton")
+    bar:SetScript("OnDragStart", function() frame:StartMoving() end)
+    bar:SetScript("OnDragStop", function() frame:StopMovingOrSizing(); SavePosition() end)
+    return
+  end
   local bar = CreateFrame("Frame", nil, frame)
   bar:SetPoint("TOPLEFT", EDGE, -EDGE)
   bar:SetPoint("TOPRIGHT", -EDGE, -EDGE)
@@ -1434,6 +1569,7 @@ local function BuildTitleBar()
 end
 
 local function BuildPortrait()
+  if ns.Flat() then return end
   -- 66px emblem circle, top-left at (-16, -18), drawn above the border. The texture carries a 72px
   -- design area (outline + shadow), so it sits 3px further out.
   local p = CreateFrame("Frame", nil, frame)
@@ -1447,7 +1583,7 @@ end
 
 local function BuildHeader()
   local hdr = CreateFrame("Frame", nil, frame)
-  hdr:SetPoint("TOPLEFT", 1 + 58, -HEADER_Y)
+  hdr:SetPoint("TOPLEFT", ns.Flat() and PAD or (1 + 58), -HEADER_Y)
   hdr:SetPoint("TOPRIGHT", -PAD, -HEADER_Y)
   hdr:SetHeight(HEADER_H)
   hdr:SetFrameLevel(frame:GetFrameLevel() + 4)
@@ -1462,10 +1598,15 @@ local function BuildHeader()
   plate:SetPoint("LEFT", frame.prev, "RIGHT", 2, 0)
   local pbg = plate:CreateTexture(nil, "BACKGROUND")
   pbg:SetPoint("TOPLEFT", 1, -1); pbg:SetPoint("BOTTOMRIGHT", -1, 1)
-  Gradient(pbg, "VERTICAL", C.black, C.coffee, 0.75, 0.55)
-  Edge(plate, 0, 1, C.paneLine, 1, "BORDER")
-  local pin = Solid(plate, "BORDER", 1, C.black, 0.8)
-  pin:SetPoint("TOPLEFT", 1, -1); pin:SetPoint("TOPRIGHT", -1, -1); pin:SetHeight(1)
+  if ns.Flat() then
+    pbg:SetAllPoints()
+    pbg:SetColorTexture(1, 1, 1, 0.06)
+  else
+    Gradient(pbg, "VERTICAL", C.black, C.coffee, 0.75, 0.55)
+    Edge(plate, 0, 1, C.paneLine, 1, "BORDER")
+    local pin = Solid(plate, "BORDER", 1, C.black, 0.8)
+    pin:SetPoint("TOPLEFT", 1, -1); pin:SetPoint("TOPRIGHT", -1, -1); pin:SetHeight(1)
+  end
 
   frame.bracketLabel = FS(plate, FRIZ, 13, C.mustard)
   frame.bracketLabel:SetJustifyH("CENTER"); frame.bracketLabel:SetJustifyV("MIDDLE")
@@ -1492,6 +1633,11 @@ end
 
 -- Inset panel background shared by the list and the detail pane.
 local function Inset(panel, top, bottom)
+  if ns.Flat() then
+    local bg = Solid(panel, "BACKGROUND", 0, C.black, 0.32)
+    bg:SetAllPoints()
+    return bg
+  end
   local bg = panel:CreateTexture(nil, "BACKGROUND")
   bg:SetPoint("TOPLEFT", 1, -1); bg:SetPoint("BOTTOMRIGHT", -1, 1)
   Gradient(bg, "VERTICAL", top, bottom, 0.82, 0.9)
@@ -1512,12 +1658,13 @@ local function BuildList()
   -- column header
   local colBg = list:CreateTexture(nil, "BACKGROUND", nil, 1)
   colBg:SetPoint("TOPLEFT", 1, -1); colBg:SetPoint("TOPRIGHT", -1, -1); colBg:SetHeight(COLHEAD_H)
-  Gradient(colBg, "VERTICAL", C.colTop, C.coffee)
-  local colLine = Solid(list, "BORDER", 2, C.bronze, 0.6)
+  if ns.Flat() then colBg:SetColorTexture(1, 1, 1, 0.05) else Gradient(colBg, "VERTICAL", C.colTop, C.coffee) end
+  local colLine = Solid(list, "BORDER", 2, ns.Flat() and C.white or C.bronze, ns.Flat() and 0.12 or 0.6)
   colLine:SetPoint("TOPLEFT", 1, -1 - COLHEAD_H); colLine:SetPoint("TOPRIGHT", -1, -1 - COLHEAD_H); colLine:SetHeight(1)
   local shade = list:CreateTexture(nil, "BACKGROUND", nil, 2) -- soft shadow under the header
   shade:SetPoint("TOPLEFT", 1, -2 - COLHEAD_H); shade:SetPoint("TOPRIGHT", -1, -2 - COLHEAD_H); shade:SetHeight(8)
   Gradient(shade, "VERTICAL", C.black, C.black, 0.45, 0)
+  shade:SetShown(not ns.Flat())
 
   -- `cols` tracks the rows' width so headers stay aligned when the scroll bar shows.
   local cols = CreateFrame("Frame", nil, list)
@@ -1526,7 +1673,7 @@ local function BuildList()
   cols:SetHeight(COLHEAD_H)
   frame.cols = cols
   local function Head(text, justify, w)
-    local fs = FS(cols, FRIZ, 10, C.mustard)
+    local fs = FS(cols, FRIZ, 10, ns.Flat() and GREY or C.mustard)
     fs:SetJustifyV("MIDDLE"); fs:SetJustifyH(justify or "LEFT")
     fs:SetHeight(COLHEAD_H)
     if w then fs:SetWidth(w) end
@@ -1668,6 +1815,7 @@ local function BuildDetailPanel()
   local glow = panel:CreateTexture(nil, "BACKGROUND", nil, 1)
   glow:SetPoint("TOPLEFT", 2, -2); glow:SetPoint("TOPRIGHT", -2, -2); glow:SetHeight(70)
   Gradient(glow, "VERTICAL", C.bronze, C.bronze, 0.10, 0)
+  glow:SetShown(not ns.Flat())
 
   local scroll = CreateFrame("ScrollFrame", "FarmerJoeDetailScroll", panel)
   scroll:SetPoint("TOPLEFT", 2, -2)
@@ -1784,10 +1932,10 @@ local function BuildFooter()
   -- rule that fades in from the left and out to the right
   local left = foot:CreateTexture(nil, "BORDER")
   left:SetPoint("TOPLEFT"); left:SetPoint("TOPRIGHT", foot, "TOP", 0, 0); left:SetHeight(1)
-  Gradient(left, "HORIZONTAL", C.bronze, C.bronze, 0, 0.6)
+  if ns.Flat() then left:SetColorTexture(1, 1, 1, 0.08) else Gradient(left, "HORIZONTAL", C.bronze, C.bronze, 0, 0.6) end
   local right = foot:CreateTexture(nil, "BORDER")
   right:SetPoint("TOPLEFT", foot, "TOP", 0, 0); right:SetPoint("TOPRIGHT"); right:SetHeight(1)
-  Gradient(right, "HORIZONTAL", C.bronze, C.bronze, 0.6, 0)
+  if ns.Flat() then right:SetColorTexture(1, 1, 1, 0.08) else Gradient(right, "HORIZONTAL", C.bronze, C.bronze, 0.6, 0) end
 
   frame.footScan = ClayButton(foot, "Scan this bracket", 11, nil, 18)
   frame.footScan:SetPoint("RIGHT", 0, -1)
@@ -1809,7 +1957,7 @@ local function BuildFooter()
 
   frame.footLeft = FS(foot, NARROW, 12, C.bronze)
   frame.footLeft:SetJustifyV("MIDDLE")
-  frame.footLeft:SetPoint("LEFT", 26, -1)
+  frame.footLeft:SetPoint("LEFT", ns.Flat() and 0 or 26, -1)
 end
 
 local function Build()
@@ -1820,7 +1968,7 @@ local function Build()
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:SetClampedToScreen(true)
-  frame:SetClampRectInsets(-19, 0, 20, 0) -- keep the overhanging portrait on screen
+  if not ns.Flat() then frame:SetClampRectInsets(-19, 0, 20, 0) end -- keep the overhanging portrait on screen
   if frame.SetDontSavePosition then frame:SetDontSavePosition(true) end
   RestorePosition()
   tinsert(UISpecialFrames, "FarmerJoeFrame") -- Esc closes

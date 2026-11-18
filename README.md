@@ -81,6 +81,7 @@ Supported client: Classic Era, `## Interface: 16001`.
 | Clear map pins | `/fj clearpins` |
 | Show / hide the minimap button | `/fj minimap` |
 | Recentre the window | `/fj reset` |
+| Switch between the flat and classic looks | `/fj theme`, then `/reload` |
 | Data and Auctionator status | `/fj info` |
 | Client build and TOC version | `/fj build` |
 | All commands | `/fj help` |

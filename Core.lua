@@ -7,6 +7,9 @@ data.meta = data.meta or {}
 
 ns.MEDIA = "Interface\\AddOns\\" .. addonName .. "\\Media\\"
 
+-- Look: "flat" (default; translucent black like the quest tracker header) or "classic" (Coffee frame).
+function ns.Flat() return not (FarmerJoeDB and FarmerJoeDB.theme == "classic") end
+
 ns.player = { level = 1, class = nil, className = nil, profs = {} }
 
 local function Print(msg)
@@ -272,6 +275,9 @@ SlashCmdList.FARMERJOE = function(msg)
       end
       ns.ScanItems(ns.FarmItemIDs(farms))
     end
+  elseif msg == "theme" then
+    FarmerJoeDB.theme = ns.Flat() and "classic" or "flat"
+    Print("Theme set to " .. FarmerJoeDB.theme .. ". Type /reload to apply it.")
   elseif msg == "session" then
     if ns.ToggleSessionWindow then ns.ToggleSessionWindow() end
   elseif msg == "start" then
@@ -281,7 +287,7 @@ SlashCmdList.FARMERJOE = function(msg)
   elseif msg == "pause" then
     if ns.SessionState() == "paused" then ns.ResumeSession() else ns.PauseSession() end
   elseif msg == "help" then
-    Print("/fj - toggle window | /fj scan - scan your bracket's items at the AH | /fj session - session tracker | /fj start, /fj pause, /fj stop - farming session | /fj live - show/hide live finds | /fj clearpins - remove map pins | /fj minimap - show/hide minimap button | /fj build | /fj info | /fj reset - recenter window")
+    Print("/fj - toggle window | /fj scan - scan your bracket's items at the AH | /fj session - session tracker | /fj start, /fj pause, /fj stop - farming session | /fj theme - flat or classic look | /fj live - show/hide live finds | /fj clearpins - remove map pins | /fj minimap - show/hide minimap button | /fj build | /fj info | /fj reset - recenter window")
   else
     ScanPlayer()
     if ns.Toggle then ns.Toggle() end
