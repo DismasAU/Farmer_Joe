@@ -250,7 +250,8 @@ local function ArrowButton(parent, dir)
 end
 
 -- 15x15 checkbox: black fill, 1px #8A7A4A border, gold check, Arial Narrow 12 Custard label.
-local function Checkbox(parent, text, key)
+-- key: a FarmerJoeDB.filters field; or pass onClick(checked) to handle it yourself.
+local function Checkbox(parent, text, key, onClick)
   local b = CreateFrame("CheckButton", nil, parent)
   local box = CreateFrame("Frame", nil, b)
   box:SetSize(15, 15)
@@ -280,6 +281,7 @@ local function Checkbox(parent, text, key)
   b:SetSize(15 + 5 + math.ceil(label:GetStringWidth()), 18)
 
   b:SetScript("OnClick", function(self)
+    if onClick then onClick(self:GetChecked() and true or false); return end
     FarmerJoeDB.filters[key] = self:GetChecked() and true or false
     ns.Refresh()
   end)
@@ -584,6 +586,7 @@ ns.Kit = {
   ClayButton = ClayButton, MakePill = MakePill, SetPill = SetPill, SlimBar = SlimBar,
   CoinIcons = CoinIcons, Coins = Coins, Money = Money, ItemIcon = ItemIcon, ShowItemTip = ShowItemTip,
   GREY = GREY, DIM = DIM, FlatChrome = FlatChrome, FlatTitle = FlatTitle, TextButton = TextButton,
+  Checkbox = Checkbox,
 }
 
 ---------------------------------------------------------------- list
@@ -1508,6 +1511,17 @@ local function BuildTitleBar()
     bar:RegisterForDrag("LeftButton")
     bar:SetScript("OnDragStart", function() frame:StartMoving() end)
     bar:SetScript("OnDragStop", function() frame:StopMovingOrSizing(); SavePosition() end)
+    local writs = FlatButton(bar, "Writs", 11, nil, 18)
+    writs:SetPoint("RIGHT", bar.close, "LEFT", -6, 0)
+    writs:SetScript("OnClick", function() if ns.ToggleWritsWindow then ns.ToggleWritsWindow() end end)
+    writs:SetScript("OnEnter", function(self)
+      GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+      GameTooltip:AddLine("Craftsman's Writs", 1, 1, 1)
+      GameTooltip:AddLine("Every writ priced from your Auctionator scans, cheapest to fill first.", 0.78, 0.78, 0.78, true)
+      GameTooltip:Show()
+    end)
+    writs:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    frame.writsButton = writs
     return
   end
   local bar = CreateFrame("Frame", nil, frame)
@@ -1566,6 +1580,19 @@ local function BuildTitleBar()
   close:SetPoint("CENTER", frame, "TOPRIGHT", -18, -18)
   close:SetFrameLevel(bar:GetFrameLevel() + 5)
   close:SetScript("OnClick", function() frame:Hide() end)
+
+  local writs = ClayButton(frame, "Writs", 11, nil, 18)
+  writs:SetPoint("RIGHT", close, "LEFT", -2, 0)
+  writs:SetFrameLevel(bar:GetFrameLevel() + 5)
+  writs:SetScript("OnClick", function() if ns.ToggleWritsWindow then ns.ToggleWritsWindow() end end)
+  writs:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    GameTooltip:AddLine("Craftsman's Writs", 1, 1, 1)
+    GameTooltip:AddLine("Every writ priced from your Auctionator scans, cheapest to fill first.", 0.78, 0.78, 0.78, true)
+    GameTooltip:Show()
+  end)
+  writs:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  frame.writsButton = writs
 end
 
 local function BuildPortrait()

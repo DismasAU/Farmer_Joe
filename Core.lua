@@ -278,6 +278,8 @@ SlashCmdList.FARMERJOE = function(msg)
   elseif msg == "theme" then
     FarmerJoeDB.theme = ns.Flat() and "classic" or "flat"
     Print("Theme set to " .. FarmerJoeDB.theme .. ". Type /reload to apply it.")
+  elseif msg == "writs" or msg == "writ" then
+    if ns.ToggleWritsWindow then ns.ToggleWritsWindow() end
   elseif msg == "session" then
     if ns.ToggleSessionWindow then ns.ToggleSessionWindow() end
   elseif msg == "start" then
@@ -287,7 +289,7 @@ SlashCmdList.FARMERJOE = function(msg)
   elseif msg == "pause" then
     if ns.SessionState() == "paused" then ns.ResumeSession() else ns.PauseSession() end
   elseif msg == "help" then
-    Print("/fj - toggle window | /fj scan - scan your bracket's items at the AH | /fj session - session tracker | /fj start, /fj pause, /fj stop - farming session | /fj theme - flat or classic look | /fj live - show/hide live finds | /fj clearpins - remove map pins | /fj minimap - show/hide minimap button | /fj build | /fj info | /fj reset - recenter window")
+    Print("/fj - toggle window | /fj scan - scan your bracket's items at the AH | /fj session - session tracker | /fj writs - cheapest Craftsman's Writs | /fj start, /fj pause, /fj stop - farming session | /fj theme - flat or classic look | /fj live - show/hide live finds | /fj clearpins - remove map pins | /fj minimap - show/hide minimap button | /fj build | /fj info | /fj reset - recenter window")
   else
     ScanPlayer()
     if ns.Toggle then ns.Toggle() end

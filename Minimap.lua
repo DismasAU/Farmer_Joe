@@ -67,7 +67,10 @@ local function Create()
   SetHover(false)
 
   button:SetScript("OnClick", function(_, mouse)
-    if mouse == "RightButton" then
+    if IsShiftKeyDown() and ns.ToggleWritsWindow then
+      ns.ToggleWritsWindow()
+      return
+    elseif mouse == "RightButton" then
       if ns.ToggleSessionWindow then ns.ToggleSessionWindow() end
       return
     end
@@ -91,6 +94,7 @@ local function Create()
     GameTooltip:AddLine("Farmer Joe", 1, 1, 1)
     GameTooltip:AddLine("Click to open/close", 0.78, 0.78, 0.78)
     GameTooltip:AddLine("Right-click: farming session", 0.78, 0.78, 0.78)
+    GameTooltip:AddLine("Shift-click: Craftsman's Writs", 0.78, 0.78, 0.78)
     local st = ns.SessionState and ns.SessionState()
     if st == "running" or st == "paused" then
       local t = ns.SessionTotals()
