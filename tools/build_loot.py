@@ -16,6 +16,8 @@ import sys
 
 from classicdb import ClassicDB
 from farm_specs import FARMS, FISH_BY_POOL
+from kills import kills_per_hour, spawn_count
+from questiedb import load_spawns
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ADDON = os.path.dirname(HERE)
@@ -58,6 +60,7 @@ def lua(v, ind=0):
 
 def main():
     db = ClassicDB()
+    spawns = load_spawns()
     seed = {(f["bracket"], f["name"]): f for f in json.load(open(os.path.join(HERE, "farms_seed.json"), encoding="utf-8"))}
     pools = list(csv.DictReader(open(os.path.join(ADDON, "pools.csv"), encoding="utf-8-sig")))
 
@@ -91,6 +94,12 @@ def main():
         mobs = spec.get("mobs", [])
         rec["mobs"] = mobs
         npcs = [db.npcs[i] for m in mobs for i in db.npc_ids(m)]
+        kph = spec.get("kph")
+        if npcs and not spec.get("fixed"):
+            nids = [n["id"] for n in npcs]
+            rec["spawns"] = spawn_count(db, nids, spawns)
+            kph = kills_per_hour(db, nids, spawns)
+        rec["kph"] = kph
         for m in mobs:
             if not db.npc_ids(m):
                 errors.append(f"{label}: mob not found: {m}")
@@ -116,7 +125,7 @@ def main():
                 pct = spec_item["est"]
             n_db += src == "db"
             n_est += src == "est"
-            per_hour = spec["kph"] * pct / 100.0 * spec_item.get("qty", 1)
+            per_hour = kph * pct / 100.0 * spec_item.get("qty", 1)
             items.append({"id": it["id"], "name": it["name"], "quality": it["quality"], "chance": round(pct, 2),
                           "perHour": round(per_hour, 2), "src": src, "prof": (spec_item.get("prof") or "").lower() or None})
 
@@ -158,7 +167,7 @@ def main():
         rec["items"] = sorted(merged.values(), key=lambda x: (x.get("prof") is not None, -x["perHour"]))
         rec["mainItem"] = rec["items"][0]["id"] if rec["items"] else None
         out[f"{spec['bracket']}|{spec['name']}"] = rec
-        report.append(f"{label[:60]:60} items {len(rec['items']):2}  db {n_db:2}  est {n_est:2}")
+        report.append(f"{label[:60]:60} kph {str(rec.get('kph')):>4} (was {str(spec.get('kph')):>4}) spawns {str(rec.get('spawns', '-')):>4}  items {len(rec['items']):2}  db {n_db:2}  est {n_est:2}")
 
     missing = [f"{b} {n}" for (b, n) in seed if f"{b}|{n}" not in out]
     for m in missing:

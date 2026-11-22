@@ -121,6 +121,8 @@ ns.LootCounts = Counts
 function ns.LiveFarm(f)
   local L = f.loot
   if not L then return nil end
+  -- the live finder also refreshes the curated farms' random-green rows; bring them up to date first
+  if ns.DynamicDirty and ns.DynamicDirty() and ns.RebuildDynamic then ns.RebuildDynamic() end
   local live = farmCache[f]
   if live then return live end
   live = { priced = 0, counted = 0, static = L.staticGold }

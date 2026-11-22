@@ -10,11 +10,20 @@ MIN_SPAWNS spawn points), dungeon/raid/battleground mobs, and rates of 95%+ or e
 in this data are vendor stock or quest-objective artefacts rather than real drop rates. Output:
     ns.drops.items[itemID] = { name, quality, npcID, chance x100, npcID, chance x100, ... }
     ns.drops.npcs[npcID]   = { name, minLevel, maxLevel, elite (0/1), zone, x, y, instance (0/1),
-                               uiMapID, { x1, y1, x2, y2, ... } }   (x, y in 0.1% of the zone map)
+                               uiMapID, { x1, y1, x2, y2, ... }, kills per hour }   (x, y in 0.1% of the zone map)
+    ns.drops.greens[bracket] = { itemID, ... }  random world-drop greens for mobs of that 5-level
+                                                bracket (1 = levels 1-5), used to price a random green
+
+Random world-drop gear (green-or-better weapons and armour that drop from many mobs at low rates)
+is kept out of items: Wowhead's per-mob rates for it come from small samples (one mob lists 49
+greens at 2% each, more than a green per kill), and in the game they share one roll per kill.
+The finder counts them as a single pool instead (WORLD_GREEN_CHANCE in Dynamic.lua).
 """
 import os
 
 from classicdb import ClassicDB
+from questiedb import load_spawns
+from kills import kills_per_hour, world_drop_gear
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(os.path.dirname(HERE), "DropIndex.lua")
@@ -32,11 +41,13 @@ def q(s):
 
 def main():
     db = ClassicDB()
-    items, used_npcs = {}, set()
+    spawns = load_spawns()
+    items, used_npcs, greens = {}, set(), {}
     for iid, srcs in db.drops.items():
         it = db.items.get(iid)
         if not it or it.get("src") != "client" or it["bind"] not in (0, 2) or it["quality"] == 0:
             continue
+        world = world_drop_gear(db, iid)
         keep = []
         for nid, pct in sorted(srcs.items(), key=lambda kv: -kv[1]):
             n = db.npcs.get(nid)
@@ -50,6 +61,13 @@ def main():
             if inst or not zone or zone in SKIP_ZONES:
                 continue
             keep.append((nid, pct))
+        if world:
+            if it["quality"] == 2:  # blues and better are too rare to count per hour
+                lv = [(db.npcs[n]["min"] + db.npcs[n]["max"]) / 2 for n in srcs if n in db.npcs and db.npcs[n]["max"] <= 60]
+                if lv:
+                    b = min(12, max(1, int((sorted(lv)[len(lv) // 2] - 1) // 5) + 1))
+                    greens.setdefault(b, []).append(iid)
+            continue
         if keep:
             items[iid] = (it, keep[:6])
             used_npcs.update(nid for nid, _ in keep[:6])
@@ -63,6 +81,11 @@ def main():
         it, keep = items[iid]
         src = ",".join(f"{nid},{round(pct * 100)}" for nid, pct in keep)
         lines.append(f"[{iid}]={{{q(it['name'])},{it['quality']},{src}}},")
+    lines.append("}, greens = {")
+    for b in sorted(greens):
+        ids = sorted(greens[b])
+        step = max(1, len(ids) // 80)  # a spread of up to 80 per bracket is plenty for a median
+        lines.append(f"[{b}]={{{','.join(str(i) for i in ids[::step][:80])}}},")
     lines.append("}, npcs = {")
     for nid in sorted(used_npcs):
         n = db.npcs[nid]
@@ -72,7 +95,7 @@ def main():
         pts_lua = ",".join(f"{px},{py}" for px, py in pts)
         lines.append(f"[{nid}]={{{q(n['name'])},{n['min']},{n['max']},{elite},{q(zone or '?')},"
                      f"{x if x is not None else 'nil'},{y if y is not None else 'nil'},{1 if inst else 0},"
-                     f"{mp if mp and mp > 0 else 'nil'},{{{pts_lua}}}}},")
+                     f"{mp if mp and mp > 0 else 'nil'},{{{pts_lua}}},{kills_per_hour(db, [nid], spawns)}}},")
     lines.append("} }")
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines) + "\n")

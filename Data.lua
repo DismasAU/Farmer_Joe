@@ -2,11 +2,11 @@
 local _, ns = ...
 ns.data = {
   meta = {
-    generated = "2026-11-17 11:52",
+    generated = "2026-11-22 16:58",
     priceSnapshot = "17 Nov 2026 10:17 AEST",
     market = "US Normal Alliance",
     seed = true,
-    farmCount = 63,
+    farmCount = 59,
   },
   brackets = { "1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45", "46-50", "51-55", "56-60" },
   farms = {
@@ -66,21 +66,12 @@ ns.data = {
     },
     {
       bracket = "6-10",
-      name = "Gray Forest Wolves",
-      zone = "Elwynn Forest",
-      profReqMode = "all",
-      thin = false,
-      crashing = false,
-      rank = 3,
-    },
-    {
-      bracket = "6-10",
       name = "Gnarlpine Pathfinders (furbolgs)",
       zone = "Teldrassil",
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 4,
+      rank = 3,
     },
     {
       bracket = "6-10",
@@ -89,7 +80,7 @@ ns.data = {
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 5,
+      rank = 4,
     },
     {
       bracket = "11-15",
@@ -270,39 +261,12 @@ ns.data = {
     },
     {
       bracket = "26-30",
-      name = "Highland Spiders",
-      zone = "Wetlands",
-      profReqMode = "all",
-      thin = false,
-      crashing = false,
-      rank = 4,
-    },
-    {
-      bracket = "26-30",
-      name = "Grimtotem Reavers",
-      zone = "Thousand Needles",
-      profReqMode = "all",
-      thin = false,
-      crashing = false,
-      rank = 5,
-    },
-    {
-      bracket = "26-30",
       name = "Mottled Scytheclaw / Razormaw raptors",
       zone = "Wetlands",
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 6,
-    },
-    {
-      bracket = "31-35",
-      name = "Marsh Owls",
-      zone = "Alterac Mountains",
-      profReqMode = "all",
-      thin = false,
-      crashing = false,
-      rank = 1,
+      rank = 4,
     },
     {
       bracket = "31-35",
@@ -311,7 +275,7 @@ ns.data = {
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 2,
+      rank = 1,
     },
     {
       bracket = "31-35",
@@ -320,7 +284,7 @@ ns.data = {
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 3,
+      rank = 2,
     },
     {
       bracket = "31-35",
@@ -329,7 +293,7 @@ ns.data = {
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 4,
+      rank = 3,
     },
     {
       bracket = "31-35",
@@ -338,7 +302,7 @@ ns.data = {
       profReqMode = "all",
       thin = false,
       crashing = false,
-      rank = 5,
+      rank = 4,
     },
     {
       bracket = "36-40",

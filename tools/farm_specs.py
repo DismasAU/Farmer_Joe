@@ -2,7 +2,10 @@
 
 Per farm:
   mobs   NPC names as in the Classic database. Levels, elite status and drop rates are looked up.
-  kph    kills per hour for one player (group runs: that player's share of the loot).
+  kph    kills per hour, worked out from the mobs' spawn points (tools/kills.py: about 100 where
+         spawns are plentiful, fewer for small camps, at most 50 for elites). Only farms marked
+         fixed=True (group runs, AoE farms, dungeons, Devilsaurs) keep the kph written here; for
+         the rest it's only a fallback when the mobs have no spawn data.
   diff   difficulty 1-5 (editorial).
   items  (item name, fallback %, qty per drop[, opts]). The drop % comes from CMaNGOS/Wowhead
          data for the listed mobs when it exists; the fallback % is only used when it doesn't,
@@ -11,7 +14,6 @@ Per farm:
 Fishing farms use `fishing` instead of mobs/items: pool tier from pools.csv and pools per hour.
 """
 
-PH = 80  # default kills per hour (GoldScout 70, Conquest Capped 100)
 
 
 def skin(tier, rate=1.0):
@@ -63,10 +65,6 @@ FARMS = [
     dict(bracket="6-10", name="Prowlers", mobs=["Prowler"], kph=85, diff=1, opt=["Skinning"],
          items=[I("Stringy Wolf Meat", 35)] + skin("light"),
          how=["Prowlers roam the Elwynn forest east of Eastvale Logging Camp.", "Skin every kill."]),
-    dict(bracket="6-10", name="Gray Forest Wolves", mobs=[], kph=85, diff=1, opt=["Skinning"],
-         items=[I("Stringy Wolf Meat", 35)] + skin("light"),
-         how=["Wolves in the Elwynn forest south of the Eastvale Logging Camp.", "Skin every kill."],
-         notes="This mob isn't in the Classic database, so drop rates are estimates."),
     dict(bracket="6-10", name="Gnarlpine Pathfinders (furbolgs)", mobs=["Gnarlpine Pathfinder"], kph=80, diff=2,
          items=[I("Linen Cloth", 45, 1.3), I("Malachite", 5)],
          how=["Loop the furbolg camps west of Dolanaar.", "Keep Linen Cloth; vendor the rest."]),
@@ -93,7 +91,7 @@ FARMS = [
     # ------------------------------------------------------------ 16-20
     dict(bracket="16-20", name="Westfall mage AoE (Defias / Westfall mobs)", class_="Mage",
          mobs=["Defias Trapper", "Defias Smuggler", "Defias Pillager", "Defias Looter", "Defias Highwayman", "Defias Knuckleduster"],
-         kph=220, diff=3,
+         fixed=True, kph=220, diff=3,
          items=[I("Linen Cloth", 45, 1.3), I("Wool Cloth", 20, 1.3), I("Minor Mana Potion", 1.5)],
          how=["Gather a pack of 6-8 Defias at the Jangolde Mine or Moonbrook camps.", "Frost Nova, back off, Arcane Explosion; repeat.", "Drink between pulls; loot everything for cloth."]),
     dict(bracket="16-20", name="Pygmy Venom Web Spiders", mobs=["Pygmy Venom Web Spider"], kph=85, diff=2,
@@ -101,7 +99,7 @@ FARMS = [
          how=["The spiders fill the caves of the Duskwood Venom Web Vale.", "Bring a poison cure if you have one."]),
     dict(bracket="16-20", name="Wailing Caverns group runs",
          mobs=["Deviate Ravager", "Deviate Stalker", "Druid of the Fang", "Deviate Creeper", "Deviate Viper", "Deviate Lurker", "Deviate Dreadfang"],
-         kph=35, diff=3,
+         fixed=True, kph=35, diff=3,
          items=[I("Deviate Scale", 9), I("Perfect Deviate Scale", 3), I("Light Leather", 5), I("Medium Leather", 2), I("Moss Agate", 0.6), I("Linen Cloth", 15, 1.3)],
          how=["Run the full dungeon with a group of five.", "Deviate Scales sell well to leatherworkers."],
          notes="Gold/hr is your share of the loot. Boss blue drops aren't counted."),
@@ -147,22 +145,10 @@ FARMS = [
          items=[I("Silk Cloth", 10, 1.2)],
          how=["The corpses shamble around the Raven Hill Cemetery in Duskwood."],
          notes="Mindless undead drop little cloth; most of the gold is coin and vendor greys."),
-    dict(bracket="26-30", name="Highland Spiders", mobs=[], kph=80, diff=2,
-         items=SPIDER,
-         how=["Spiders in the Wetlands highlands east of the Thandol Span road."],
-         notes="This mob isn't in the Classic database, so drop rates are estimates."),
-    dict(bracket="26-30", name="Grimtotem Reavers", mobs=[], kph=80, diff=3,
-         items=[I("Silk Cloth", 35, 1.3), I("Wool Cloth", 15, 1.3)],
-         how=["Grimtotem camps sit on the Thousand Needles mesas."],
-         notes="This mob isn't in the Classic database, so drop rates are estimates."),
     dict(bracket="26-30", name="Mottled Scytheclaw / Razormaw raptors", mobs=["Mottled Scytheclaw", "Mottled Razormaw"], kph=80, diff=2, opt=["Skinning"],
          items=[I("Raptor Egg", 30), I("Raptor Flesh", 20)] + skin("medium"),
          how=["Raptors roam the Wetlands ridges around the Raptor Ridge."]),
     # ------------------------------------------------------------ 31-35
-    dict(bracket="31-35", name="Marsh Owls", mobs=[], kph=75, diff=2,
-         items=[I("Long Tail Feather", 25), I("Small Egg", 20)],
-         how=["Owls in the Alterac Mountains foothills above Hillsbrad."],
-         notes="This mob isn't in the Classic database, so drop rates are estimates."),
     dict(bracket="31-35", name="Elemental Slaves", mobs=["Elemental Slave"], kph=80, diff=2,
          items=[I("Elemental Earth", 7), I("Heavy Stone", 30), I("Deeprock Salt", 20)],
          how=["The slaves work the Dalaran crater edge in Alterac."]),
@@ -227,7 +213,7 @@ FARMS = [
          kph=70, diff=3,
          items=[I("Mageweave Cloth", 35, 1.4), I("Wildvine", 10), I("Pattern: Ironfeather Breastplate", 1)],
          how=["Clear the lower Jintha'Alor terraces.", "The upper terraces are elite; skip them solo."]),
-    dict(bracket="46-50", name="Zul'Farrak graveyard", mobs=[], kph=90, diff=3,
+    dict(bracket="46-50", name="Zul'Farrak graveyard", mobs=[], fixed=True, kph=90, diff=3,
          items=[I("Mageweave Cloth", 30, 1.3)],
          how=["Pull the graveyard zombies in large packs (AoE classes).", "Reset and repeat."],
          notes="Dungeon mobs aren't in the Classic database, so drop rates are estimates."),
@@ -259,18 +245,18 @@ FARMS = [
          how=["Scorpids swarm the Burning Steppes around the Altar of Storms."]),
     dict(bracket="56-60", name="Stratholme (Scarlet side) group runs",
          mobs=["Crimson Conjuror", "Crimson Initiate", "Crimson Guardsman", "Crimson Defender", "Crimson Gallant", "Crimson Sorcerer", "Crimson Battle Mage", "Crimson Priest", "Crimson Inquisitor", "Crimson Monk"],
-         kph=40, diff=4,
+         fixed=True, kph=40, diff=4,
          items=[I("Runecloth", 50, 1.6), I("Righteous Orb", 7.5), I("Major Mana Potion", 1)],
          how=["Run Stratholme Live with a group of five.", "Righteous Orbs and Runecloth are the steady earners."],
          notes="Gold/hr is your share of the loot. Boss drops aren't counted."),
     dict(bracket="56-60", name="Cyclone Warriors", mobs=["Cyclone Warrior"], kph=75, diff=2,
          items=[I("Essence of Air", 11), I("Breath of Wind", 5), I("Elemental Air", 4)],
          how=["Cyclone Warriors drift around Silithus (41, 58)."]),
-    dict(bracket="56-60", name="Maraudon solo (Balance Druid)", class_="Druid", mobs=[], kph=60, diff=4,
+    dict(bracket="56-60", name="Maraudon solo (Balance Druid)", class_="Druid", mobs=[], fixed=True, kph=60, diff=4,
          items=[I("Runecloth", 15, 1.3)],
          how=["Solo the Princess wing with Moonkin AoE and Entangling Roots.", "Vendor everything; BoE greens and blues are the real income."],
          notes="Most of the gold here is vendor loot and BoE gear, which isn't priced from your scans."),
-    dict(bracket="56-60", name="Devilsaurs", mobs=["Devilsaur", "Ironhide Devilsaur", "Tyrant Devilsaur"], kph=12, diff=4, prof=["Skinning"],
+    dict(bracket="56-60", name="Devilsaurs", mobs=["Devilsaur", "Ironhide Devilsaur", "Tyrant Devilsaur"], fixed=True, kph=12, diff=4, prof=["Skinning"],
          items=[dict(name="Devilsaur Leather", est=150, qty=1, prof="Skinning", skin=True), dict(name="Rugged Leather", est=60, qty=1, prof="Skinning", skin=True)],
          how=["Hunt the Devilsaurs that patrol Un'Goro Crater.", "Kite or trap them; they are elite.", "Skin every kill for Devilsaur Leather."]),
 ]

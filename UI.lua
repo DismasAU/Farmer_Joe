@@ -1043,12 +1043,13 @@ local function MarketLive(f)
   end
 
   -- loot table: Item | /hr | Price | g/hr
-  local rows, anyEst, missingProf = {}, false, {}
+  local rows, anyEst, anyPool, missingProf = {}, false, false, {}
   for _, it in ipairs(L.items) do
     local counts = ns.LootCounts(f, it)
     local m = hasAH and ns.ItemMarket(it.id) or {}
     local name = it.name
-    if it.src == "est" then name = name .. Col("bronze", "*"); anyEst = true end
+    if it.pool then name = name .. Col("bronze", "+"); anyPool = true
+    elseif it.src == "est" then name = name .. Col("bronze", "*"); anyEst = true end
     local perHr = it.perHour >= 10 and string.format("%.0f", it.perHour) or string.format("%.1f", it.perHour)
     local gph = (m.price and counts) and Coins(ns.FormatGold(m.price / 10000 * it.perHour)) or "-"
     local row = { name, perHr, Money(m.price) or "-", gph, icon = ItemIcon(it.id) or QUESTION, itemID = it.id }
@@ -1087,7 +1088,12 @@ local function MarketLive(f)
     notes[#notes + 1] = string.format("Includes %s %s per hour of %s.", APPROX, ns.FormatGold(L.staticGold), L.staticGoldLabel or "estimated extras")
     notes[#notes + 1] = string.format("Assumes %d pools per hour; fish per pool from pools.csv.", L.poolsPerHour or 15)
   elseif L.kph then
-    notes[#notes + 1] = string.format("Assumes %d kills per hour. Drop rates from classic-db and Wowhead.", L.kph)
+    local basis = L.spawns and string.format(" (%d spawn points)", L.spawns) or ""
+    notes[#notes + 1] = string.format("Assumes %d kills per hour%s. Drop rates from classic-db and Wowhead.", L.kph, basis)
+  end
+  if anyPool then
+    notes[#notes + 1] = string.format("+ Random greens share one roll per kill: about %d in 100 kills give one. Priced at the median green for this level.",
+      math.floor((ns.WORLD_GREEN_CHANCE or 0.02) * 100 + 0.5))
   end
   if anyEst then notes[#notes + 1] = "* No recorded drop rate; the amount is an estimate." end
   local need = {}

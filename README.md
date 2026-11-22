@@ -112,7 +112,8 @@ ns.GREY_AH_MIN = 50000 -- copper (5g): greys below this auction price are always
 - **Gold per hour** is the sum of each item's price × its expected amount per hour, plus fixed extras such as fishing containers. Items that need a profession you don't have (for example, Skinning) are left out.
 - **Difficulty** is an editorial 1 to 5 rating: Easy, Steady, Tricky, Hard, Brutal.
 - **Drop chances** come from CMaNGOS classic-db and Wowhead data. Chances that had to be estimated are marked in game.
-- **Kills per hour** assumes one player at a steady pace, about 80 kills an hour for normal mobs and 40 for elites. Your results will vary, which is what the session tracker is for.
+- **Kills per hour** comes from how many spawn points the mobs have (counted from QuestieDB): about 5 kills an hour per spawn point, up to 100 for big spawn areas, so a small camp of 8 spawns gets 40. Elites are capped at 50. Group runs, AoE farms and Devilsaurs keep hand-set rates. Your results will vary, which is what the session tracker is for.
+- **Random world-drop greens** share one roll per kill (about 2 in 100 kills give a green), so they're counted as a single "Random green" line priced at the median auction price of greens for that level, never as dozens of separate items. Wowhead's per-mob rates for them come from small samples and add up to far more than one green per kill.
 - **Session gold per hour** = (coin + what your loot sells for) ÷ time farmed. Each item is valued at its vendor price or its auction price after the cut, whichever its badge says.
 
 ---
@@ -144,7 +145,7 @@ The generated Lua files are built with the Python scripts in `tools/`. Python 3 
 ```bash
 python tools/build_data.py      # Data.lua
 python tools/build_loot.py      # Loot.lua (farm loot specs live in tools/farm_specs.py)
-python tools/build_drops.py     # DropIndex.lua
+python tools/build_drops.py     # DropIndex.lua (kill rates from QuestieDB spawn points; tools/kills.py has the rules)
 python tools/build_writs.py     # Writs.lua (checks every writ against Wowhead; --scan looks for new ones)
 python tools/make_textures.py   # Media/*.tga
 ```
